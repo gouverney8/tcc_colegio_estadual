@@ -202,6 +202,7 @@ tcc_colegio_estadual/
 │   ├── CREDITOS.md
 │   ├── GUIA_DO_PROJETO.md
 │   ├── CHANGELOG.md
+│   ├── AJUSTE_PES_PLATAFORMA.md
 │   └── atividade-amostra-de-cursos-2026.docx
 └── Jorginho_Jornada_Sem_Retorno/          projeto Godot
     ├── project.godot
@@ -220,6 +221,7 @@ tcc_colegio_estadual/
 | [Créditos e licenças](docs/CREDITOS.md) | Autoria e contribuições de outros projetos |
 | [Assets selecionados](docs/ASSETS_SELECIONADOS.md) | Critério de escolha da arte e do áudio |
 | [Histórico de versões](docs/CHANGELOG.md) | Evolução do jogo |
+| [Ajuste dos pés nas plataformas](docs/AJUSTE_PES_PLATAFORMA.md) | Alinhamento chão/sprite e como desfazer |
 | [Análise geral](docs/ANALISE_GERAL_DO_JOGO.md) | Problemas encontrados e soluções |
 
 ---

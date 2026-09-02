@@ -1,6 +1,6 @@
-[gd_resource type="TileSet" format=3]
+[gd_resource type="TileSet" format=3 uid="uid://bcnwvgg5gvfjd"]
 
-[ext_resource type="Texture2D" path="res://assets/selected/biomes/four_seasons/four-seasons-platformer-11.png" id="1_vqx5f"]
+[ext_resource type="Texture2D" uid="uid://bgnoltdotd0di" path="res://assets/selected/biomes/four_seasons/four-seasons-platformer-11.png" id="1_vqx5f"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_g3eio"]
 texture = ExtResource("1_vqx5f")

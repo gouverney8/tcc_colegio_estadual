@@ -1,5 +1,12 @@
 # Histórico de versões
 
+## Ajuste 2026-09-02 — pés alinhados às plataformas
+
+- Sprite do Jorginho: offset `-5` (flutuava) → `8`/`7` (afundava) → `3` (`PLAYER_SPRITE_FEET_OFFSET_Y`).
+- Plataformas elevadas: colisão 16 px (antes 14) e margem one-way 2 (antes 10).
+- Fantasma do dash acompanha o offset do sprite.
+- Como desfazer: [docs/AJUSTE_PES_PLATAFORMA.md](AJUSTE_PES_PLATAFORMA.md).
+
 ## Versão 1.8 — prólogo RPG, Limiar vivo e direção visual
 
 - Prólogo reconstruído como uma cena RPG contínua: narrativa reescrita, nome do interlocutor, retrato de Jorginho, texto progressivo, tempo confortável de leitura e comando para acelerar ou avançar.

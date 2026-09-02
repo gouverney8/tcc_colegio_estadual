@@ -44,6 +44,13 @@ const GUARDIAN_PATH := "res://assets/selected/enemies/"
 const TRANSITION_SHADER: Shader = preload("res://scripts/shaders/transition.gdshader")
 const LIFE_DROP_CHANCE := 0.28
 const BASE_RESOLUTION := Vector2i(1152,648)
+# Ajuste pés/plataforma (2026-09-02). Histórico do offset do sprite:
+# -5.0 flutuava  |  8.0 / 7.0 afundava  |  3.0 sobe ~4 px em relação ao 7
+# PLATFORM_ONE_WAY_MARGIN original 10.0  |  ELEVATED_PLATFORM_COLLISION_HEIGHT original 14.0
+# Ver docs/AJUSTE_PES_PLATAFORMA.md
+const PLAYER_SPRITE_FEET_OFFSET_Y := 1.0
+const PLATFORM_ONE_WAY_MARGIN := 2.0
+const ELEVATED_PLATFORM_COLLISION_HEIGHT := 16.0
 const DISPLAY_RESOLUTIONS: Array[Vector2i] = [Vector2i(1152,648),Vector2i(1280,720),Vector2i(1600,900),Vector2i(1920,1080),Vector2i(2560,1440)]
 const VISUAL_SCALES: Array[float] = [0.85,1.0,1.15,1.30]
 const FX_SHIELD: Texture2D = preload("res://assets/selected/fx/shield_parry.png")
@@ -166,12 +173,13 @@ var menu_walk_time := 0.0
 var menu_parallax_layers: Array[Parallax2D] = []
 var last_hud_second := -1
 var facing := 1.0
+var last_player_anim := "idle"
 var checkpoint := Vector2.ZERO
 var level_width := 3200.0
 var hero_textures := {}
 var hero_animation_frames := {
 	"idle":[Vector2i(0,0),Vector2i(0,1)],
-	"run":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(0,1),Vector2i(1,1),Vector2i(2,1),Vector2i(0,2),Vector2i(1,2),Vector2i(2,2)],
+	"run":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(0,1),Vector2i(1,1),Vector2i(2,1),Vector2i(0,2),Vector2i(1,2)],
 	"jump":[Vector2i(0,0),Vector2i(1,0)],
 	"fall":[Vector2i(0,1),Vector2i(1,1)],
 	"attack":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(3,0),Vector2i(4,0),Vector2i(5,0)],
@@ -314,8 +322,16 @@ func _process(delta: float) -> void:
 			layer_node.position = Vector2(-mouse_parallax.x*depth*7.0,-mouse_parallax.y*depth*4.0+sin(menu_walk_time*0.35+depth)*depth)
 
 func clear_screen() -> void:
+	# Libera na hora para o parallax da fase anterior não ficar visível
+	# por baixo da fase nova (queue_free só some no fim do frame).
+	var keep := ["JorginhoMusic","LevelTransition"]
+	var doomed: Array[Node] = []
 	for child in get_children():
-		if child.name not in ["JorginhoMusic","LevelTransition"]: child.queue_free()
+		if child.name not in keep:
+			doomed.append(child)
+	for child in doomed:
+		remove_child(child)
+		child.free()
 	world = null
 	hud = null
 	boss_hud_bar = null
@@ -750,19 +766,30 @@ func set_resolution(size: Vector2i) -> void:
 	if embedded_run:
 		if is_instance_valid(settings_status_label): settings_status_label.text="Resolução salva; será aplicada na próxima execução em janela externa."
 		return
+	apply_content_scale()
 	if DisplayServer.window_get_mode()==DisplayServer.WINDOW_MODE_WINDOWED:
 		call_deferred("apply_windowed_resolution")
 
+func apply_content_scale() -> void:
+	var win := get_window()
+	if win==null: return
+	win.content_scale_size = BASE_RESOLUTION
+	win.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
+	win.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP
+	win.content_scale_factor = visual_scale
+
 func apply_windowed_resolution() -> void:
 	if embedded_run or DisplayServer.window_get_mode()!=DisplayServer.WINDOW_MODE_WINDOWED: return
+	apply_content_scale()
 	DisplayServer.window_set_size(windowed_resolution)
 	await get_tree().process_frame
+	apply_content_scale()
 	center_game_window()
 	if is_instance_valid(settings_status_label): settings_status_label.text="Resolução aplicada: %d × %d." % [windowed_resolution.x,windowed_resolution.y]
 
 func set_visual_scale(value: float) -> void:
 	visual_scale = clampf(value,0.75,1.5)
-	get_window().content_scale_factor = visual_scale
+	apply_content_scale()
 
 func center_game_window() -> void:
 	if embedded_run: return
@@ -1251,7 +1278,7 @@ func apply_settings() -> void:
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"),linear_to_db(maxf(master_volume,0.001)))
 	AudioManager.set_music_volume(music_volume)
 	AudioManager.set_sfx_volume(sfx_volume)
-	get_window().content_scale_factor = visual_scale
+	apply_content_scale()
 
 func load_level() -> void:
 	state = "playing"
@@ -1552,16 +1579,17 @@ func create_parallax() -> void:
 	sky.size = Vector2(level_width+2000,1000)
 	sky.z_index = -20
 	world.add_child(sky)
-	var back_tint: Color = [Color(0.58,0.67,0.42,1.0),Color(0.42,0.58,0.30,0.96),Color(0.23,0.48,0.55,0.94),Color(0.55,0.28,0.18,0.94),Color(0.26,0.54,0.74,0.96),Color(0.32,0.52,0.82,0.98)][level]
-	var middle_tint: Color = [Color(0.82,0.94,0.70,0.98),Color(0.65,0.82,0.42,0.96),Color(0.33,0.66,0.68,0.94),Color(0.84,0.38,0.20,0.96),Color(0.44,0.76,0.92,0.96),Color(0.55,0.75,1.0,0.98)][level]
-	add_world_parallax_layer("back.png",2.40,Vector2(0.10,0.06),back_tint,-17)
-	add_world_parallax_layer("middle.png",2.40,Vector2(0.30,0.14),middle_tint,-12)
-	# As fases de travessia ganham o mesmo horizonte da arena que preparam.
-	# Isso cria continuidade: a forja conduz ao arsenal e o abismo conduz ao
-	# trono gelado, sem deixar um bosque verde por tras de pisos industriais.
-	if level==2:
+	var biome := String(current_level_data.get("biome",levels[level].get("biome","")))
+	# Cada bioma usa só o próprio horizonte. A faixa verde da floresta não
+	# pode atravessar a forja, o arsenal nem o gelo.
+	if biome in ["illusion","forest_boss"]:
+		var back_tint: Color = [Color(0.58,0.67,0.42,1.0),Color(0.42,0.58,0.30,0.96)][mini(level,1)]
+		var middle_tint: Color = [Color(0.82,0.94,0.70,0.98),Color(0.65,0.82,0.42,0.96)][mini(level,1)]
+		add_world_parallax_layer("back.png",2.40,Vector2(0.10,0.06),back_tint,-17)
+		add_world_parallax_layer("middle.png",2.40,Vector2(0.30,0.14),middle_tint,-12)
+	elif biome in ["trapmoor","factory_boss"]:
 		create_boss_arena_backdrop("cat_boss",Color("#d46538"))
-	elif level==4:
+	else:
 		create_boss_arena_backdrop("pengu_boss",Color("#65bde8"))
 	var atmosphere := ColorRect.new()
 	atmosphere.position = Vector2(-500,-100)
@@ -1741,7 +1769,7 @@ func draw_four_seasons_platform(body: StaticBody2D, rect: Vector4, collision_hei
 
 func create_platform(rect: Vector4, draw_visual := true) -> void:
 	var is_ground := rect.y>=550.0 and rect.z>=level_width*0.85
-	var collision_height := rect.w if is_ground else 14.0
+	var collision_height := rect.w if is_ground else ELEVATED_PLATFORM_COLLISION_HEIGHT
 	var body := StaticBody2D.new()
 	body.z_index = 2
 	body.position = Vector2(rect.x + rect.z/2.0, rect.y + collision_height/2.0)
@@ -1751,7 +1779,7 @@ func create_platform(rect: Vector4, draw_visual := true) -> void:
 	collision.shape = shape
 	if not is_ground:
 		collision.one_way_collision = true
-		collision.one_way_collision_margin = 10.0
+		collision.one_way_collision_margin = PLATFORM_ONE_WAY_MARGIN
 	body.add_child(collision)
 	if draw_visual:
 		draw_four_seasons_platform(body,rect,collision_height,is_ground)
@@ -1776,11 +1804,12 @@ func create_player(pos: Vector2) -> void:
 	player_sprite.region_enabled = true
 	player_sprite.region_rect = hero_frame_rect("idle",0)
 	player_sprite.scale = Vector2(1.35,1.35)
-	# O pixel mais baixo do herói está em y=79 dentro do frame 128x128.
-	# Este deslocamento alinha visualmente os pés ao fundo da cápsula física.
-	player_sprite.position.y = -5
+	# Alinha os pés ao topo da colisão. Antes: -5 (sprite subia e o herói flutuava).
+	player_sprite.position.y = PLAYER_SPRITE_FEET_OFFSET_Y
 	player_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	player.add_child(player_sprite)
+	last_player_anim = "idle"
+	anim_time = 0.0
 	# Sem luz local: ela criava um retângulo escuro acompanhando a câmera em GL Compatibility.
 	camera = Camera2D.new()
 	camera.position = Vector2(64,-40)
@@ -2804,7 +2833,6 @@ func create_double_jump_fx() -> void:
 	tween.tween_callback(ring.queue_free)
 
 func animate_player(delta: float, axis: float) -> void:
-	anim_time += delta
 	var anim := "idle"
 	if attack_time > 0:
 		anim = "jump_attack" if not player.is_on_floor() else ("attack_end" if combo_step == 3 else "attack")
@@ -2812,14 +2840,16 @@ func animate_player(delta: float, axis: float) -> void:
 		anim = "jump" if player.velocity.y < 0 else "fall"
 	elif abs(axis) > 0.1:
 		anim = "run"
+	if anim!=last_player_anim:
+		anim_time = 0.0
+		last_player_anim = anim
+	anim_time += delta
 	player_sprite.texture = hero_textures[anim]
 	var animation_coordinates: Array = hero_animation_frames.get(anim,hero_animation_frames.idle)
 	var frame := int(anim_time*(10.0 if anim=="run" else 7.0))%animation_coordinates.size()
 	if attack_time > 0.0:
 		frame = mini(animation_coordinates.size()-1,int((attack_elapsed/maxf(attack_duration,0.01))*float(animation_coordinates.size())))
 	player_sprite.region_rect = hero_frame_rect(anim,frame)
-	# O spritesheet original olha para a direita; espelha apenas ao caminhar
-	# para a esquerda. A mesma regra vale para corrida e todos os ataques.
 	player_sprite.flip_h = facing < 0
 	if damage_flash_time > 0:
 		var progress := 1.0-damage_flash_time/0.62
@@ -3850,7 +3880,7 @@ func create_dash_fx() -> void:
 		ghost.texture = player_sprite.texture
 		ghost.region_enabled = true
 		ghost.region_rect = player_sprite.region_rect
-		ghost.position = player.position-Vector2(dash_direction*i*22.0,0)
+		ghost.position = player.position-Vector2(dash_direction*i*22.0,0)+player_sprite.position
 		ghost.scale = player_sprite.scale
 		ghost.flip_h = dash_direction<0
 		ghost.modulate = Color(0.35,0.95,0.82,0.30-float(i)*0.05)
@@ -3991,13 +4021,19 @@ func get_boss() -> Dictionary:
 
 func skip_level_developer() -> void:
 	if state!="playing": return
+	var leftover := get_node_or_null("LevelTransition")
+	if leftover:
+		leftover.free()
 	var next_index := level+1
 	if next_index>=levels.size():
 		flash_message("MODO DEV  •  JORNADA ENCERRADA",Color("#ffe28a"))
 		show_end(true)
 		return
 	flash_message("MODO DEV  •  FASE %d → %d" % [level+1,next_index+1],Color("#ffe28a"))
-	transition_to_next_level()
+	level = next_index
+	health = minf(float(max_health),health+1.0)
+	save_progress()
+	load_level()
 
 func try_finish_level() -> void:
 	if state!="playing": return
