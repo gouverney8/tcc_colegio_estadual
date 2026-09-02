@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## Ajuste 2026-09-02 — moeda CEP girando
+
+- Coletável do mundo passou a usar `assets/selected/collectible/moeda-cep/` (quadros 1–12 em loop a 12 fps).
+- Tamanho visual igual ao fragmento anterior (40,5 px). O prólogo segue com `portal_fragment.png`.
+
 ## Ajuste 2026-09-02 — pés alinhados às plataformas
 
 - Sprite do Jorginho: offset `-5` (flutuava) → `8`/`7` (afundava) → `3` (`PLAYER_SPRITE_FEET_OFFSET_Y`).

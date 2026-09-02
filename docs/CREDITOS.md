@@ -17,7 +17,7 @@ As licenças originais dos pacotes foram preservadas em `Jorginho_Jornada_Sem_Re
 | Estruturação do projeto e migração do protótipo HTML para GDScript/Godot | assistência de OpenAI Codex |
 | Engine | Godot Engine 4.7 |
 
-Interface própria (logo, botão, painel e cursor), direção visual e o spritesheet `Dimensional_Portal.png` seguem a direção do autor do projeto.
+Interface própria (logo, botão, painel e cursor), a moeda CEP (`assets/selected/collectible/moeda-cep/`), direção visual e o spritesheet `Dimensional_Portal.png` seguem a direção do autor do projeto.
 
 ---
 

@@ -75,9 +75,11 @@ Packs completos, cópias WAV duplicadas, previews de desenvolvimento e backups i
 
 ## Moedas / fragmentos
 
-**Asset escolhido:** `assets/selected/collectible/portal_fragment.png`.
+**Asset escolhido no mundo:** `assets/selected/collectible/moeda-cep/` (12 quadros, `1.png` … `12.png`), animados em loop para o giro.
 
-**Motivo:** recorte de 18×18 com alto contraste, aura simples e movimento por rotação/bobbing. A folha completa de 912×1040 não é carregada.
+**Tamanho em jogo:** o mesmo da moeda anterior (18×18 com escala 2,25 → **40,5 px**). Os PNG originais têm 1254×1254; a escala é `40,5 / largura_da_textura`.
+
+**Prólogo:** `portal_fragment.png` continua só na cutscene de origem.
 
 ## Portal
 

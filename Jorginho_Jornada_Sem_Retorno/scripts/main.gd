@@ -30,6 +30,22 @@ const HEART_EMPTY: Texture2D = preload("res://assets/selected/ui_crimson/heart_e
 const PORTAL_SHEET: Texture2D = preload("res://assets/selected/portal/dimensional_portal.png")
 const PORTAL_FRAME_INACTIVE: Texture2D = preload("res://assets/selected/portal/inactive.png")
 const PORTAL_FRAGMENT: Texture2D = preload("res://assets/selected/collectible/portal_fragment.png")
+const COIN_SPIN_FRAMES: Array[Texture2D] = [
+	preload("res://assets/selected/collectible/moeda-cep/1.png"),
+	preload("res://assets/selected/collectible/moeda-cep/2.png"),
+	preload("res://assets/selected/collectible/moeda-cep/3.png"),
+	preload("res://assets/selected/collectible/moeda-cep/4.png"),
+	preload("res://assets/selected/collectible/moeda-cep/5.png"),
+	preload("res://assets/selected/collectible/moeda-cep/6.png"),
+	preload("res://assets/selected/collectible/moeda-cep/7.png"),
+	preload("res://assets/selected/collectible/moeda-cep/8.png"),
+	preload("res://assets/selected/collectible/moeda-cep/9.png"),
+	preload("res://assets/selected/collectible/moeda-cep/10.png"),
+	preload("res://assets/selected/collectible/moeda-cep/11.png"),
+	preload("res://assets/selected/collectible/moeda-cep/12.png")
+]
+const COIN_DISPLAY_SIZE := 18.0 * 2.25
+const COIN_SPIN_FPS := 12.0
 const DISPLAY_FONT: Font = preload("res://assets/selected/fonts/display.ttf")
 const UI_LOGO: Texture2D = preload("res://assets/selected/ui/logo.png")
 const UI_BUTTON: Texture2D = preload("res://assets/selected/ui/button.png")
@@ -1838,28 +1854,21 @@ func create_coin(pos: Vector2) -> void:
 	shape.radius = 27
 	col.shape = shape
 	area.add_child(col)
-	var aura := Line2D.new()
-	aura.name = "Aura"
-	var aura_points := PackedVector2Array()
-	for i in 25:
-		var a := TAU*float(i)/24.0
-		aura_points.append(Vector2(cos(a)*23.0,sin(a)*23.0))
-	aura.points = aura_points
-	aura.width = 3.0
-	aura.default_color = Color(0.45,1.0,0.82,0.34)
-	area.add_child(aura)
-	var crystal := Sprite2D.new()
+	var crystal := AnimatedSprite2D.new()
 	crystal.name = "Crystal"
-	crystal.texture = PORTAL_FRAGMENT
-	crystal.scale = Vector2(2.25,2.25)
+	var frames := SpriteFrames.new()
+	frames.add_animation("spin")
+	frames.set_animation_loop("spin", true)
+	frames.set_animation_speed("spin", COIN_SPIN_FPS)
+	for texture in COIN_SPIN_FRAMES:
+		frames.add_frame("spin", texture)
+	crystal.sprite_frames = frames
+	var tex_w := float(COIN_SPIN_FRAMES[0].get_width())
+	crystal.scale = Vector2.ONE * (COIN_DISPLAY_SIZE / maxf(tex_w, 1.0))
+	crystal.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	crystal.play("spin")
+	crystal.frame = rng.randi_range(0, maxi(COIN_SPIN_FRAMES.size() - 1, 0))
 	area.add_child(crystal)
-	for i in 3:
-		var mote := Polygon2D.new()
-		mote.polygon = PackedVector2Array([Vector2(0,-2),Vector2(2,0),Vector2(0,2),Vector2(-2,0)])
-		mote.color = Color("#fff3ad")
-		mote.position = Vector2(cos(TAU*i/3.0)*30,sin(TAU*i/3.0)*17)
-		mote.set_meta("orbit",TAU*i/3.0)
-		area.add_child(mote)
 	area.body_entered.connect(func(body): if body == player: collect_coin(area))
 	world.add_child(area)
 	coin_nodes.append(area)
@@ -2684,14 +2693,6 @@ func _physics_process(delta: float) -> void:
 				base_position=base_position.move_toward(player.position,165.0*delta)
 				coin.set_meta("base_position",base_position)
 			coin.position=base_position+Vector2(0,sin(time*2.5+phase)*7.0)
-			coin.get_node("Crystal").rotation = sin(time*1.7+phase)*0.12
-			coin.get_node("Aura").rotation = time*0.45
-			var orbit_index := 0
-			for child in coin.get_children():
-				if child.has_meta("orbit"):
-					var angle := float(child.get_meta("orbit"))+time*(0.9+orbit_index*0.12)
-					child.position = Vector2(cos(angle)*30,sin(angle)*17)
-					orbit_index += 1
 	if is_instance_valid(portal):
 		var portal_time := Time.get_ticks_msec()/1000.0
 		var phase := float(portal.get_meta("portal_phase"))
