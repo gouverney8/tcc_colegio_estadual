@@ -1,9 +1,26 @@
 # Histórico de versões
 
+## Ajuste 2026-09-02 — pés, escala, rachadura e prólogo
+
+- Personagem um pouco menor (`HERO_SPRITE_SCALE` 0.40 → 0.36). Pés do chão grosso recalibrados; plataformas finas descem só a colisão (`ELEVATED_PLATFORM_TOP_INSET`).
+- Queda alta passou a usar `hero_new/rachadura.png`: cratera, fumaça em 3 quadros e pedras atrás do herói.
+- Prólogo: o puxão do portal não inchava mais o sprite 256 px (escalas antigas 1.65). Travessia de fase sem `TRANS_BACK`.
+- Tabela para calibrar depois: [docs/AJUSTE_PES_PLATAFORMA.md](AJUSTE_PES_PLATAFORMA.md).
+
+## Ajuste 2026-09-02 — novo sprite do Jorginho
+
+- Folhas do ChatGPT em `assets/hero_new/` identificadas e renomeadas (`hero_idle`, `hero_run`, `hero_attack`, etc.).
+- Gameplay passou a usar faixas em `assets/hero/jorginho/` (256×256). O swordsman antigo fica só no histórico.
+- Parado ~5,5 s: olhar, guarda e sacar a espada (`hero_poses`).
+- Queda alta até o chão, sem pulo/dash no ar: fumaça e espinhos atrás dos pés (`hero_jump_fx`).
+- Como desfazer / mapa dos arquivos: [docs/HEROI_SPRITES.md](HEROI_SPRITES.md).
+
 ## Ajuste 2026-09-02 — moeda CEP girando
 
 - Coletável do mundo passou a usar `assets/selected/collectible/moeda-cep/` (quadros 1–12 em loop a 12 fps).
 - Tamanho visual igual ao fragmento anterior (40,5 px). O prólogo segue com `portal_fragment.png`.
+- Coleta: zoom da face CEP enquanto sobe; depois encolhe sugada pela barra de fragmentos e explode no HUD.
+- Barra de fragmentos com moldura dourada da moeda; na chegada ela incha, brilha ouro/verde e um clarão atravessa o preenchimento.
 
 ## Ajuste 2026-09-02 — pés alinhados às plataformas
 

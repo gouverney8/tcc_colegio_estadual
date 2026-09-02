@@ -1,63 +1,64 @@
-# Ajuste dos pés nas plataformas
+# Ajustes manuais do Jorginho (pés, tamanho, impacto, prólogo)
 
-Aplicado em 2 de setembro de 2026. Serve para desfazer o alinhamento se os pés ficarem baixo demais, se o pulo atravessar plataforma fina, ou se o visual do dash/ataque parecer deslocado.
+Tudo fica no topo de `Jorginho_Jornada_Sem_Retorno/scripts/main.gd`, junto de `BASE_RESOLUTION`.  
+Mude **só as constantes**. Não é preciso editar plataformas, TileMap nem as cenas.
 
-## Problema
+Número **maior** no offset do sprite **desce** o desenho. Número **menor** **sobe**. A colisão do corpo não muda.
 
-O Jorginho parecia flutuar em todas as plataformas: os pés desenhados ficavam acima do chão, embora a cápsula de colisão já estivesse apoiada.
+## Onde mexer agora
 
-## Avaliação de risco (antes da mudança)
+| Constante | Valor atual | O que faz | Se ficar ruim |
+| :--- | ---: | :--- | :--- |
+| `HERO_SPRITE_SCALE` | `0.36` | Tamanho no jogo (era `0.40`) | Suba para `0.38` se ficar miúdo; desça para `0.34` se ainda tapar demais |
+| `HERO_CUTSCENE_SCALE` | `0.38` | Tamanho do Jorginho no prólogo | Mantenha ~`0.02` acima do gameplay |
+| `HERO_PORTRAIT_SCALE` | `0.30` | Retrato na caixa de diálogo | `0.26` se encostar no texto; `0.34` se sumir |
+| `HERO_CUTSCENE_FEET_Y` | `502.0` | Altura dos pés no palco do prólogo | Maior = desce o herói no cenário |
+| `PLAYER_SPRITE_FEET_OFFSET_Y` | `-7.0` | Alinha os pés ao chão grosso (imagem 1) | `-9` sobe (flutua); `-5` desce (afunda) |
+| `ELEVATED_PLATFORM_TOP_INSET` | `4.0` | Desce só a colisão das plataformas finas (imagem 2) | `2` se afundar na musgo; `6` se ainda flutuar |
+| `PLATFORM_ONE_WAY_MARGIN` | `2.0` | Passar plataforma por baixo | Só suba para `4` se o pulo furar plataforma fina |
+| `ELEVATED_PLATFORM_COLLISION_HEIGHT` | `16.0` | Altura da caixa das plataformas | Não mexer sem motivo |
+| `IMPACT_BURST_SCALE` | `0.42` | Fumaça + rachadura da queda alta | `0.34` menor; `0.50` maior |
+| `IMPACT_CRACK_SCALE` | `0.28` | Cratera que fica no chão | Idem |
+| `IMPACT_DEBRIS_SCALE` | `0.34` | Pedras que sobem | Idem |
+| `HIGH_FALL_DROP` | `180.0` | Queda mínima (px) para o efeito | Maior = só quedas mais longas |
+| `HIGH_FALL_GROUND_Y` | `500.0` | Só dispara perto do chão da fase | Menor = também em plataformas do meio |
 
-| Sistema | Depende do sprite Y? | Risco |
-| --- | --- | --- |
-| Colisão, pulo, gravidade, `is_on_floor` | Não: usam o `CharacterBody2D` | Nenhum |
-| Câmera | Não: é filha do corpo | Nenhum |
-| Ataque, dash, dano | Quase não: usam `player.global_position` | O golpe visual pode ficar ~13 px acima dos pés; a hitbox não muda |
-| Guarda / aparar | Ícone preso ao corpo | Escudo pode parecer um pouco alto no peito |
-| Tween de squash no parry | Só altera `scale` | Nenhum |
-| Fantasma do dash | Era spawnado em `player.position` sem o offset do sprite | Ajustado junto, para não ficar flutuando |
-| Atravessar plataforma por baixo (one-way) | Margem menor (10 → 2) | Queda muito rápida *pode* furar plataforma fina. Se acontecer, subir a margem para `4.0` ou `6.0`, não voltar para `10.0` |
-| TileMap das fases | Não foi editado | Coordenadas X/Y das cenas permanecem iguais |
+## Como calibrar os pés
 
-Não foi alterado o array `levels[].platforms` nem as cenas em `scenes/levels`.
+1. Fique parado no **chão grosso** da fase 1 (grama + terra). Esse é o alvo da imagem 1.
+2. Se flutuar ou afundar **no chão**, mexa `PLAYER_SPRITE_FEET_OFFSET_Y` de 1 em 1.
+3. Suba numa **plataforma fina**. Se flutuar e o chão estiver certo, mexa só `ELEVATED_PLATFORM_TOP_INSET`.
+4. Se mudar `HERO_SPRITE_SCALE`, o sprite é centrado: encolher **sobe** os pés. Compense somando no offset cerca de `119 * (escala_antiga - escala_nova)`.
 
-## Onde foi aplicado
+Exemplo: de `0.36` para `0.34` → offset sobe ~`2.4` (de `-7` para ~`-4.5`).
 
-Arquivo único: `Jorginho_Jornada_Sem_Retorno/scripts/main.gd`
+## Queda alta (rachadura)
 
-### Constantes (topo do arquivo, junto de `BASE_RESOLUTION`)
+Folha original: `assets/hero_new/rachadura.png` (4 fileiras × 3 intensidades).
 
-| Constante | Original | Tentativas | Valor atual |
-| --- | ---: | ---: | ---: |
-| `PLAYER_SPRITE_FEET_OFFSET_Y` | `-5.0` (flutuava) | `8.0` → `7.0` (afundava) | `3.0` |
-| `PLATFORM_ONE_WAY_MARGIN` | `10.0` | — | `2.0` |
-| `ELEVATED_PLATFORM_COLLISION_HEIGHT` | `14.0` | — | `16.0` |
+O jogo usa a **3ª fileira** (rachadura + fumaça + pedras), que é o impacto completo:
 
-Número **menor** no offset do sprite **sobe** o desenho. Número **maior** **desce**. A colisão não muda.
+- `assets/hero/jorginho/impact_burst.png` — 3 quadros da fileira combinada
+- `assets/hero/jorginho/impact_crack.png` — cratera da 1ª fileira, fica um instante no solo
+- `assets/hero/jorginho/impact_debris.png` — pedras da 4ª fileira
 
-### Usos
+Nasce **atrás** do herói, nos pés, só se a queda for longa até o chão **sem** pulo extra nem dash no ar.
 
-1. `create_player` — `player_sprite.position.y = PLAYER_SPRITE_FEET_OFFSET_Y`  
-   Desce o desenho até o topo da colisão.
-2. `create_platform` — `collision_height` das plataformas elevadas e `one_way_collision_margin`  
-   Topo da colisão continua em `rect.y`. A caixa fica com 16 px (tile) e a margem one-way deixa de empurrar o corpo ~10 px para cima.
-3. `create_dash_fx` — fantasma soma `player_sprite.position`  
-   O rastro do dash acompanha os pés novos.
+## Prólogo (portal puxando)
 
-## Como desfazer manualmente
+As escalas antigas (`1.65` / `0.10`) eram do swordsman 64 px e **inchavam** o herói 256 px.
 
-No topo de `scripts/main.gd`, volte as três constantes:
+Agora o resolve só dá um pulso de `HERO_CUTSCENE_SCALE * 1.06` e o portal encolhe até `HERO_CUTSCENE_SCALE * 0.16`, sem `TRANS_BACK` (esse easing crescia antes de encolher).
 
-```gdscript
-const PLAYER_SPRITE_FEET_OFFSET_Y := -5.0
-const PLATFORM_ONE_WAY_MARGIN := 10.0
-const ELEVATED_PLATFORM_COLLISION_HEIGHT := 14.0
-```
+A travessia de fase no portal do mapa também encolhe com `TRANS_QUAD` + `EASE_IN`.
 
-Se só o dash ficar estranho, em `create_dash_fx` restaure:
+## Como desfazer
 
 ```gdscript
-ghost.position = player.position-Vector2(dash_direction*i*22.0,0)
+const HERO_SPRITE_SCALE := 0.40
+const HERO_CUTSCENE_SCALE := 0.44
+const PLAYER_SPRITE_FEET_OFFSET_Y := -12.0
+const ELEVATED_PLATFORM_TOP_INSET := 0.0
 ```
 
-Se os pés ainda afundarem, baixe o offset (ex.: `2.0` ou `1.0`). Se voltarem a flutuar, suba o offset (ex.: `4.0` ou `5.0`). Não mexa na margem.
+E, na ação `"resolve"` / `"pull"` de `show_origin_cutscene`, voltar os tweens `Vector2(1.65,1.65)` e `Vector2(0.10,0.10)`.

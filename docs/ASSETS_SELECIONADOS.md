@@ -8,7 +8,8 @@ A seleção segue esta ordem: funcionamento, fluidez, leitura do gameplay, consi
 
 ### Recomendado
 
-- `assets/hero`: seis spritesheets coerentes, leves e com frames regulares de 128×128.
+- `assets/hero/jorginho`: faixas 256×256 do Jorginho novo (idle, corrida, pulo, queda, ataque, ataque aéreo e dano).
+- `assets/hero`: swordsman antigo mantido só como histórico.
 - `assets/enemies`: cogumelo e criatura voadora preservados por compatibilidade.
 - `assets/selected/enemies`: Bramble, Sentinela e Guardião Ancestral com animações separadas de idle, caminhada, ataque e dano.
 - `assets/selected/biomes/illusion`: duas camadas de parallax e plataformas da Floresta da Ilusão.

@@ -222,6 +222,7 @@ tcc_colegio_estadual/
 | [Assets selecionados](docs/ASSETS_SELECIONADOS.md) | Critério de escolha da arte e do áudio |
 | [Histórico de versões](docs/CHANGELOG.md) | Evolução do jogo |
 | [Ajuste dos pés nas plataformas](docs/AJUSTE_PES_PLATAFORMA.md) | Alinhamento chão/sprite e como desfazer |
+| [Sprites do Jorginho](docs/HEROI_SPRITES.md) | Folhas novas, nomes e como desfazer |
 | [Análise geral](docs/ANALISE_GERAL_DO_JOGO.md) | Problemas encontrados e soluções |
 
 ---

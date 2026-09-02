@@ -26,7 +26,8 @@ Interface própria (logo, botão, painel e cursor), a moeda CEP (`assets/selecte
 | Pacote / asset | Autor / origem | Licença | Onde está a licença |
 | --- | --- | --- | --- |
 | Four Seasons Platformer Tileset | Analog Studios / Kevin's Mom's House, a partir de RottingPixels | CC0 1.0 | [fonte](https://kevins-moms-house.itch.io/four-seasons-platformer-tileset) |
-| Hero Swordsman (Jorginho atual) | tbbk | CC0 | [OpenGameArt](https://opengameart.org/content/hero-swordsman) |
+| Jorginho atual (`assets/hero/jorginho`) | direção de Gustavo; preparação assistida por ImageGen | projeto | `docs/HEROI_SPRITES.md` |
+| Hero Swordsman (personagem anterior) | tbbk | CC0 | [OpenGameArt](https://opengameart.org/content/hero-swordsman) |
 | Male Hero Free (personagem antigo, só histórico de créditos) | Ozzbit Games | pessoal / não comercial; crédito obrigatório | `credits/male_hero_LICENSE.txt` |
 | Forest of Illusion | pacote original | ver PDF | `credits/licenses/forest_of_illusion_license.pdf` |
 | Forest Parallax Vertical | autoria não identificada nos arquivos fornecidos | revisar antes de republicar | — |

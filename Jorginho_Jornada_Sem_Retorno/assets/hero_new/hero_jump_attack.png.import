@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xtpjb7xvm28l"
-path="res://.godot/imported/Hero swordsman Jump Attack.png-03356759a4718b1c1186e30907fe183b.ctex"
+uid="uid://ckk3wajhdfc5f"
+path="res://.godot/imported/hero_jump_attack.png-479b357f21a3b59b70e8c0733103eaf3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/hero/swordsman/Hero swordsman Jump Attack.png"
-dest_files=["res://.godot/imported/Hero swordsman Jump Attack.png-03356759a4718b1c1186e30907fe183b.ctex"]
+source_file="res://assets/hero_new/hero_jump_attack.png"
+dest_files=["res://.godot/imported/hero_jump_attack.png-479b357f21a3b59b70e8c0733103eaf3.ctex"]
 
 [params]
 

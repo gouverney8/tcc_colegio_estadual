@@ -46,6 +46,14 @@ const COIN_SPIN_FRAMES: Array[Texture2D] = [
 ]
 const COIN_DISPLAY_SIZE := 18.0 * 2.25
 const COIN_SPIN_FPS := 12.0
+const COIN_PICKUP_ZOOM := 2.6
+const COIN_PICKUP_ZOOM_TIME := 0.12
+const COIN_PICKUP_HOLD_TIME := 0.04
+const COIN_PICKUP_SUCK_TIME := 0.22
+const COIN_PICKUP_SUCK_SCALE := 0.12
+const COIN_GOLD := Color("#ffe08a")
+const COIN_GREEN := Color("#9dff72")
+const LIMIAR_TEAL := Color("#61dfc4")
 const DISPLAY_FONT: Font = preload("res://assets/selected/fonts/display.ttf")
 const UI_LOGO: Texture2D = preload("res://assets/selected/ui/logo.png")
 const UI_BUTTON: Texture2D = preload("res://assets/selected/ui/button.png")
@@ -55,18 +63,45 @@ const ILLUSION_PATH := "res://assets/selected/biomes/illusion/"
 const TRAPMOOR_PATH := "res://assets/selected/biomes/trapmoor/"
 const FOUR_SEASONS_PATH := "res://assets/selected/biomes/four_seasons/"
 const HERO_SWORDSMAN_PATH := "res://assets/hero/swordsman/"
+const HERO_JORGINHO_PATH := "res://assets/hero/jorginho/"
+const HERO_FRAME_SIZE := 256
+# Ajustes manuais do herói: docs/AJUSTE_PES_PLATAFORMA.md
+const HERO_SPRITE_SCALE := 0.36
+const HERO_CUTSCENE_SCALE := 0.38
+const HERO_PORTRAIT_SCALE := 0.30
+const HERO_CUTSCENE_FEET_Y := 502.0
+const HERO_IDLE: Texture2D = preload("res://assets/hero/jorginho/jorginho_idle.png")
+const HERO_RUN: Texture2D = preload("res://assets/hero/jorginho/jorginho_run.png")
+const HERO_JUMP: Texture2D = preload("res://assets/hero/jorginho/jorginho_jump.png")
+const HERO_FALL: Texture2D = preload("res://assets/hero/jorginho/jorginho_fall.png")
+const HERO_ATTACK: Texture2D = preload("res://assets/hero/jorginho/jorginho_attack.png")
+const HERO_JUMP_ATTACK: Texture2D = preload("res://assets/hero/jorginho/jorginho_jump_attack.png")
+const HERO_HURT: Texture2D = preload("res://assets/hero/jorginho/jorginho_hurt.png")
+const HERO_IDLE_FIDGET: Texture2D = preload("res://assets/hero/jorginho/jorginho_idle_fidget.png")
+const IMPACT_BURST: Texture2D = preload("res://assets/hero/jorginho/impact_burst.png")
+const IMPACT_CRACK: Texture2D = preload("res://assets/hero/jorginho/impact_crack.png")
+const IMPACT_DEBRIS: Texture2D = preload("res://assets/hero/jorginho/impact_debris.png")
+const IMPACT_BURST_FRAME := Vector2i(384, 320)
+const IMPACT_BURST_SCALE := 0.42
+const IMPACT_CRACK_SCALE := 0.28
+const IMPACT_DEBRIS_SCALE := 0.34
+const IDLE_FIDGET_DELAY := 5.5
+const IDLE_FIDGET_HOLD := 0.95
+const HIGH_FALL_DROP := 180.0
+const HIGH_FALL_GROUND_Y := 500.0
 const KENNEY_INDUSTRIAL_PATH := "res://assets/selected/props/kenney_industrial/"
 const GUARDIAN_PATH := "res://assets/selected/enemies/"
 const TRANSITION_SHADER: Shader = preload("res://scripts/shaders/transition.gdshader")
+const FRAGMENT_LIQUID_SHADER: Shader = preload("res://scripts/shaders/fragment_liquid.gdshader")
 const LIFE_DROP_CHANCE := 0.28
 const BASE_RESOLUTION := Vector2i(1152,648)
-# Ajuste pés/plataforma (2026-09-02). Histórico do offset do sprite:
-# -5.0 flutuava  |  8.0 / 7.0 afundava  |  3.0 sobe ~4 px em relação ao 7
-# PLATFORM_ONE_WAY_MARGIN original 10.0  |  ELEVATED_PLATFORM_COLLISION_HEIGHT original 14.0
+# Ajuste pés/plataforma. Histórico do offset: -5 flutuava | 8/7 afundava | 3 | -12 (herói 256 @ 0.40)
+# Com escala 0.36 o -7 mantém os pés do chão. Plataforma fina: ELEVATED_PLATFORM_TOP_INSET.
 # Ver docs/AJUSTE_PES_PLATAFORMA.md
-const PLAYER_SPRITE_FEET_OFFSET_Y := 1.0
+const PLAYER_SPRITE_FEET_OFFSET_Y := -7.0
 const PLATFORM_ONE_WAY_MARGIN := 2.0
 const ELEVATED_PLATFORM_COLLISION_HEIGHT := 16.0
+const ELEVATED_PLATFORM_TOP_INSET := 4.0
 const DISPLAY_RESOLUTIONS: Array[Vector2i] = [Vector2i(1152,648),Vector2i(1280,720),Vector2i(1600,900),Vector2i(1920,1080),Vector2i(2560,1440)]
 const VISUAL_SCALES: Array[float] = [0.85,1.0,1.15,1.30]
 const FX_SHIELD: Texture2D = preload("res://assets/selected/fx/shield_parry.png")
@@ -159,6 +194,11 @@ var hitstop_active := false
 var assisted_target: Node2D
 var jumps_left := 2
 var was_on_floor := false
+var idle_stand_time := 0.0
+var idle_fidgeting := false
+var land_pose_time := 0.0
+var fall_start_y := 0.0
+var fall_air_action := false
 var coyote_time := 0.0
 var jump_buffer_time := 0.0
 var dash_time := 0.0
@@ -194,14 +234,15 @@ var checkpoint := Vector2.ZERO
 var level_width := 3200.0
 var hero_textures := {}
 var hero_animation_frames := {
-	"idle":[Vector2i(0,0),Vector2i(0,1)],
-	"run":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(0,1),Vector2i(1,1),Vector2i(2,1),Vector2i(0,2),Vector2i(1,2)],
-	"jump":[Vector2i(0,0),Vector2i(1,0)],
-	"fall":[Vector2i(0,1),Vector2i(1,1)],
-	"attack":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(3,0),Vector2i(4,0),Vector2i(5,0)],
-	"attack_end":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(3,0),Vector2i(4,0),Vector2i(5,0)],
-	"jump_attack":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(3,0),Vector2i(4,0),Vector2i(5,0)],
-	"hurt":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0)]
+	"idle":[Vector2i(0,0),Vector2i(1,0)],
+	"run":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(3,0)],
+	"jump":[Vector2i(0,0)],
+	"fall":[Vector2i(0,0),Vector2i(1,0)],
+	"attack":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(3,0)],
+	"attack_end":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(3,0)],
+	"jump_attack":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0),Vector2i(3,0),Vector2i(4,0)],
+	"hurt":[Vector2i(0,0),Vector2i(1,0)],
+	"idle_fidget":[Vector2i(0,0),Vector2i(1,0),Vector2i(2,0)]
 }
 var rng := RandomNumberGenerator.new()
 var life_drops: Array[Area2D] = []
@@ -214,6 +255,15 @@ var difficulty_hud_label: Label
 var cutscene_token := 0
 var cutscene_advance_requested := false
 var portal_charge_bar: ProgressBar
+var fragment_panel: PanelContainer
+var fragment_bar_host: Control
+var fragment_fill_style: StyleBoxFlat
+var fragment_bg_style: StyleBoxFlat
+var fragment_shine: ColorRect
+var fragment_liquid: ColorRect
+var fragment_liquid_clip: Control
+var fragment_coin_icon: TextureRect
+var fragment_glow_tween: Tween
 var combat_chain := 0
 var combat_chain_time := 0.0
 
@@ -297,22 +347,23 @@ func _ready() -> void:
 	Input.set_custom_mouse_cursor(UI_CURSOR,Input.CURSOR_ARROW,Vector2(2,2))
 	load_settings()
 	hero_textures = {
-		"idle": load(HERO_SWORDSMAN_PATH+"Hero swordsman idle.png"),
-		"run": load(HERO_SWORDSMAN_PATH+"Hero swordsman Run.png"),
-		"jump": load(HERO_SWORDSMAN_PATH+"Hero swordsman Jump and Fall.png"),
-		"fall": load(HERO_SWORDSMAN_PATH+"Hero swordsman Jump and Fall.png"),
-		"attack": load(HERO_SWORDSMAN_PATH+"Hero swordsman Attack.png"),
-		"attack_end": load(HERO_SWORDSMAN_PATH+"Hero swordsman Attack.png"),
-		"jump_attack": load(HERO_SWORDSMAN_PATH+"Hero swordsman Jump Attack.png"),
-		"hurt": load(HERO_SWORDSMAN_PATH+"Hero swordsman Hurt and Die.png")
+		"idle": HERO_IDLE,
+		"run": HERO_RUN,
+		"jump": HERO_JUMP,
+		"fall": HERO_FALL,
+		"attack": HERO_ATTACK,
+		"attack_end": HERO_ATTACK,
+		"jump_attack": HERO_JUMP_ATTACK,
+		"hurt": HERO_HURT,
+		"idle_fidget": HERO_IDLE_FIDGET
 	}
 	show_startup_presentation()
 
 func hero_frame_rect(animation_name: String, frame_index: int) -> Rect2:
 	var coordinates: Array = hero_animation_frames.get(animation_name,hero_animation_frames.idle)
-	if coordinates.is_empty(): return Rect2(0,0,64,64)
+	if coordinates.is_empty(): return Rect2(0,0,HERO_FRAME_SIZE,HERO_FRAME_SIZE)
 	var coordinate: Vector2i = coordinates[posmod(frame_index,coordinates.size())]
-	return Rect2(coordinate.x*64,coordinate.y*64,64,64)
+	return Rect2(coordinate.x*HERO_FRAME_SIZE,coordinate.y*HERO_FRAME_SIZE,HERO_FRAME_SIZE,HERO_FRAME_SIZE)
 
 func reset_exhibition_session() -> void:
 	# A jornada existe apenas durante esta execução. Cada visitante da mostra
@@ -355,6 +406,15 @@ func clear_screen() -> void:
 	boss_status_label = null
 	difficulty_hud_label = null
 	portal_charge_bar = null
+	fragment_panel = null
+	fragment_bar_host = null
+	fragment_fill_style = null
+	fragment_bg_style = null
+	fragment_shine = null
+	fragment_liquid = null
+	fragment_liquid_clip = null
+	fragment_coin_icon = null
+	fragment_glow_tween = null
 	guard_bar = null
 	guard_label = null
 	guard_button = null
@@ -979,11 +1039,11 @@ func show_origin_cutscene() -> void:
 	hero.texture = hero_textures.run
 	hero.region_enabled = true
 	hero.region_rect = hero_frame_rect("run",0)
-	hero.position = Vector2(86,450)
-	hero.scale = Vector2(1.48,1.48)
+	hero.position = Vector2(86, HERO_CUTSCENE_FEET_Y - float(HERO_FRAME_SIZE) * 0.5 * HERO_CUTSCENE_SCALE)
+	hero.scale = Vector2(HERO_CUTSCENE_SCALE,HERO_CUTSCENE_SCALE)
 	hero.flip_h = false
 	hero.z_index = 5
-	hero.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	hero.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	stage_root.add_child(hero)
 	var fragment := Sprite2D.new()
 	fragment.name = "Fragment"
@@ -1042,8 +1102,8 @@ func show_origin_cutscene() -> void:
 	portrait.region_enabled = true
 	portrait.region_rect = hero_frame_rect("idle",0)
 	portrait.position = Vector2(140,568)
-	portrait.scale = Vector2(1.06,1.06)
-	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	portrait.scale = Vector2(HERO_PORTRAIT_SCALE,HERO_PORTRAIT_SCALE)
+	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	portrait.z_index = 23
 	layer.add_child(portrait)
 	var story := Label.new()
@@ -1115,14 +1175,14 @@ func show_origin_cutscene() -> void:
 				hero.texture = hero_textures.attack
 				hero.region_rect = hero_frame_rect("attack",0)
 				var stand := create_tween().bind_node(hero)
-				stand.tween_property(hero,"scale",Vector2(1.65,1.65),0.18)
-				stand.tween_property(hero,"scale",Vector2(1.55,1.55),0.22)
+				stand.tween_property(hero,"scale",Vector2(HERO_CUTSCENE_SCALE*1.06,HERO_CUTSCENE_SCALE*1.06),0.18)
+				stand.tween_property(hero,"scale",Vector2(HERO_CUTSCENE_SCALE,HERO_CUTSCENE_SCALE),0.22)
 			"pull":
 				cutscene_wind(stage_root,portal_fx.position,hero)
 				var pull := create_tween().bind_node(hero)
 				pull.tween_property(hero,"position",portal_fx.position+Vector2(-8,24),2.65).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN)
 				pull.parallel().tween_property(hero,"rotation",-0.55,1.35)
-				pull.parallel().tween_property(hero,"scale",Vector2(0.35,0.35),2.65)
+				pull.parallel().tween_property(hero,"scale",Vector2(HERO_CUTSCENE_SCALE*0.16,HERO_CUTSCENE_SCALE*0.16),2.65).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 				var camera_pull := create_tween().bind_node(stage_root)
 				camera_pull.tween_property(stage_root,"scale",Vector2(1.07,1.07),2.5).set_trans(Tween.TRANS_SINE)
 				camera_pull.parallel().tween_property(stage_root,"position",Vector2(-54,-22),2.5)
@@ -1794,6 +1854,7 @@ func create_platform(rect: Vector4, draw_visual := true) -> void:
 	shape.size = Vector2(rect.z,collision_height)
 	collision.shape = shape
 	if not is_ground:
+		collision.position.y = ELEVATED_PLATFORM_TOP_INSET
 		collision.one_way_collision = true
 		collision.one_way_collision_margin = PLATFORM_ONE_WAY_MARGIN
 	body.add_child(collision)
@@ -1819,10 +1880,10 @@ func create_player(pos: Vector2) -> void:
 	player_sprite.texture = hero_textures.idle
 	player_sprite.region_enabled = true
 	player_sprite.region_rect = hero_frame_rect("idle",0)
-	player_sprite.scale = Vector2(1.35,1.35)
+	player_sprite.scale = Vector2(HERO_SPRITE_SCALE,HERO_SPRITE_SCALE)
 	# Alinha os pés ao topo da colisão. Antes: -5 (sprite subia e o herói flutuava).
 	player_sprite.position.y = PLAYER_SPRITE_FEET_OFFSET_Y
-	player_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	player_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	player.add_child(player_sprite)
 	last_player_anim = "idle"
 	anim_time = 0.0
@@ -1839,6 +1900,11 @@ func create_player(pos: Vector2) -> void:
 	world.add_child(player)
 	jumps_left = 2
 	was_on_floor = false
+	idle_stand_time = 0.0
+	idle_fidgeting = false
+	land_pose_time = 0.0
+	fall_start_y = 0.0
+	fall_air_action = false
 
 func create_coin(pos: Vector2) -> void:
 	var area := Area2D.new()
@@ -1879,31 +1945,165 @@ func collect_coin(area: Area2D) -> void:
 	area.set_deferred("monitoring",false)
 	coins += 1
 	coin_nodes.erase(area)
-	create_collect_burst(area.position)
 	create_floating_text(area.position,"+1 FRAGMENTO",Color("#ffe15b"))
 	play_ui_sound("fragment_pickup.wav",-10.0,rng.randf_range(0.96,1.08))
-	var pickup := create_tween().bind_node(area)
-	pickup.tween_property(area,"scale",Vector2(1.7,1.7),0.10).set_trans(Tween.TRANS_BACK)
-	pickup.parallel().tween_property(area,"modulate:a",0.0,0.16)
-	pickup.tween_callback(area.queue_free)
+	play_coin_suck_to_hud(area)
+	area.queue_free()
 	update_hud()
-	pulse_fragment_feedback()
-	flash_message("FRAGMENTO ENCONTRADO  %d/%d" % [coins,total_coins], Color("#ffe28a"))
-	update_portal_charge()
+	if is_instance_valid(portal_charge_bar):
+		portal_charge_bar.value = coins - 1
 	if coins == total_coins:
 		set_portal_active()
 		flash_message("PORTAL DESBLOQUEADO!", Color("#7dffcf"))
+	else:
+		flash_message("FRAGMENTO ENCONTRADO  %d/%d" % [coins,total_coins], Color("#ffe28a"))
+
+func fragment_bar_canvas_position() -> Vector2:
+	if is_instance_valid(portal_charge_bar):
+		return portal_charge_bar.get_global_rect().get_center()
+	if is_instance_valid(coin_label):
+		return coin_label.get_global_rect().get_center()
+	return Vector2(576, 48)
+
+func play_coin_suck_to_hud(area: Area2D) -> void:
+	if not is_instance_valid(hud) or COIN_SPIN_FRAMES.is_empty():
+		return
+	var start := area.get_global_transform_with_canvas().origin
+	var target := fragment_bar_canvas_position()
+	var lift := start.lerp(target, 0.30)
+	var tex_w := float(COIN_SPIN_FRAMES[0].get_width())
+	var base := COIN_DISPLAY_SIZE / maxf(tex_w, 1.0)
+	var flyer := Sprite2D.new()
+	flyer.texture = COIN_SPIN_FRAMES[0]
+	flyer.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	flyer.position = start
+	flyer.scale = Vector2.ONE * base
+	flyer.z_index = 80
+	hud.add_child(flyer)
+	var pickup := create_tween().bind_node(flyer)
+	pickup.set_parallel(true)
+	pickup.tween_property(flyer,"scale",Vector2.ONE*(base*COIN_PICKUP_ZOOM),COIN_PICKUP_ZOOM_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	pickup.tween_property(flyer,"position",lift,COIN_PICKUP_ZOOM_TIME).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	pickup.set_parallel(false)
+	pickup.tween_interval(COIN_PICKUP_HOLD_TIME)
+	pickup.set_parallel(true)
+	pickup.tween_property(flyer,"position",target,COIN_PICKUP_SUCK_TIME).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	pickup.tween_property(flyer,"scale",Vector2.ONE*(base*COIN_PICKUP_SUCK_SCALE),COIN_PICKUP_SUCK_TIME).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	pickup.tween_property(flyer,"modulate:a",0.55,COIN_PICKUP_SUCK_TIME)
+	pickup.set_parallel(false)
+	pickup.tween_callback(func():
+		if is_instance_valid(flyer):
+			create_hud_burst(flyer.position)
+			flyer.queue_free()
+		pulse_fragment_feedback()
+	)
+
+func create_hud_burst(pos: Vector2) -> void:
+	if not is_instance_valid(hud): return
+	for i in 14:
+		var spark := Polygon2D.new()
+		spark.polygon = PackedVector2Array([Vector2(0,-4),Vector2(2.5,0),Vector2(0,4),Vector2(-2.5,0)])
+		spark.color = COIN_GOLD if i%2==0 else COIN_GREEN
+		spark.position = pos
+		spark.z_index = 81
+		hud.add_child(spark)
+		var angle := TAU*float(i)/14.0
+		var dest := pos+Vector2(cos(angle),sin(angle))*rng.randf_range(16,42)
+		var tween := create_tween().bind_node(spark)
+		tween.tween_property(spark,"position",dest,0.18).set_trans(Tween.TRANS_QUAD)
+		tween.parallel().tween_property(spark,"modulate:a",0.0,0.18)
+		tween.tween_callback(spark.queue_free)
+	spawn_hud_absorb_ring(pos, COIN_GOLD, 1.0)
+	spawn_hud_absorb_ring(pos, COIN_GREEN, 0.04)
+
+func spawn_hud_absorb_ring(pos: Vector2, color: Color, delay: float) -> void:
+	if not is_instance_valid(hud): return
+	var ring := Panel.new()
+	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ring.size = Vector2(18, 18)
+	ring.position = pos - ring.size * 0.5
+	ring.pivot_offset = ring.size * 0.5
+	ring.z_index = 82
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0,0,0,0)
+	style.border_color = color
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(9)
+	style.anti_aliasing = true
+	ring.add_theme_stylebox_override("panel", style)
+	hud.add_child(ring)
+	var wave := create_tween().bind_node(ring)
+	if delay > 0.0:
+		wave.tween_interval(delay)
+	wave.tween_property(ring,"scale",Vector2(3.6,2.4),0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	wave.parallel().tween_property(ring,"modulate:a",0.0,0.22)
+	wave.tween_callback(ring.queue_free)
+
+func set_fragment_bar_heat(amount: float) -> void:
+	if is_instance_valid(fragment_liquid) and fragment_liquid.material is ShaderMaterial:
+		(fragment_liquid.material as ShaderMaterial).set_shader_parameter("heat", amount)
+	if fragment_bg_style:
+		fragment_bg_style.border_color = Color("#c9a24e").lerp(COIN_GOLD, amount)
+		fragment_bg_style.shadow_size = int(round(lerpf(3.0, 8.0, amount)))
+		fragment_bg_style.shadow_color = Color(0.92, 0.72, 0.18, 0.22 + 0.40 * amount)
+	if is_instance_valid(coin_label):
+		coin_label.add_theme_color_override("font_color", Color("#ffe28a").lerp(Color("#fff6c4"), amount))
+
+func sweep_fragment_shine() -> void:
+	if not is_instance_valid(fragment_shine) or not is_instance_valid(fragment_liquid_clip): return
+	var height := maxf(fragment_liquid_clip.size.y, 8.0)
+	fragment_shine.visible = true
+	fragment_shine.size = Vector2(16, height)
+	fragment_shine.position = Vector2(-18, 0)
+	fragment_shine.color = Color(1.0, 0.94, 0.62, 0.70)
+	var sweep := create_tween().bind_node(fragment_shine)
+	sweep.tween_property(fragment_shine,"position:x",fragment_liquid_clip.size.x + 4.0,0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	sweep.parallel().tween_property(fragment_shine,"color:a",0.0,0.26)
+
+func update_fragment_liquid_fill(_value := 0.0) -> void:
+	if not is_instance_valid(fragment_liquid) or not is_instance_valid(fragment_liquid_clip) or not is_instance_valid(portal_charge_bar):
+		return
+	var max_v := maxf(float(portal_charge_bar.max_value), 1.0)
+	var ratio := clampf(float(portal_charge_bar.value) / max_v, 0.0, 1.0)
+	var inner := fragment_liquid_clip.size
+	if inner.x < 2.0:
+		inner = Vector2(fragment_bar_host.size.x - 8.0, fragment_bar_host.size.y - 8.0) if is_instance_valid(fragment_bar_host) else Vector2(310, 8)
+	fragment_liquid.position = Vector2.ZERO
+	fragment_liquid.size = Vector2(inner.x * ratio, inner.y)
 
 func pulse_fragment_feedback() -> void:
 	if is_instance_valid(portal_charge_bar):
-		var pulse := create_tween().bind_node(portal_charge_bar)
-		pulse.tween_property(portal_charge_bar,"modulate",Color("#ffffff"),0.05)
-		pulse.tween_property(portal_charge_bar,"modulate",Color("#75f5d7"),0.10)
-		pulse.tween_property(portal_charge_bar,"modulate",Color.WHITE,0.18)
+		var fill := create_tween().bind_node(portal_charge_bar)
+		fill.tween_property(portal_charge_bar,"value",float(coins),0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	var host: Control = fragment_bar_host if is_instance_valid(fragment_bar_host) else portal_charge_bar
+	if is_instance_valid(host):
+		host.pivot_offset = host.size * 0.5
+		if fragment_glow_tween and fragment_glow_tween.is_valid():
+			fragment_glow_tween.kill()
+		fragment_glow_tween = create_tween().bind_node(host)
+		fragment_glow_tween.set_parallel(true)
+		fragment_glow_tween.tween_property(host,"scale",Vector2(1.07,1.34),0.08).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		fragment_glow_tween.tween_method(set_fragment_bar_heat,0.0,1.0,0.09)
+		if is_instance_valid(fragment_coin_icon):
+			fragment_coin_icon.pivot_offset = fragment_coin_icon.size * 0.5
+			fragment_glow_tween.tween_property(fragment_coin_icon,"scale",Vector2(1.28,1.28),0.08).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		if is_instance_valid(fragment_panel):
+			fragment_panel.pivot_offset = fragment_panel.size * 0.5
+			fragment_glow_tween.tween_property(fragment_panel,"scale",Vector2(1.025,1.04),0.08).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		fragment_glow_tween.set_parallel(false)
+		fragment_glow_tween.tween_interval(0.06)
+		fragment_glow_tween.set_parallel(true)
+		fragment_glow_tween.tween_property(host,"scale",Vector2.ONE,0.24).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		fragment_glow_tween.tween_method(set_fragment_bar_heat,1.0,0.0,0.30)
+		if is_instance_valid(fragment_coin_icon):
+			fragment_glow_tween.tween_property(fragment_coin_icon,"scale",Vector2.ONE,0.24)
+		if is_instance_valid(fragment_panel):
+			fragment_glow_tween.tween_property(fragment_panel,"scale",Vector2.ONE,0.24)
+	sweep_fragment_shine()
 	if is_instance_valid(coin_label):
 		var label_pulse := create_tween().bind_node(coin_label)
-		label_pulse.tween_property(coin_label,"scale",Vector2(1.12,1.12),0.08).set_trans(Tween.TRANS_BACK)
-		label_pulse.tween_property(coin_label,"scale",Vector2.ONE,0.15)
+		label_pulse.tween_property(coin_label,"scale",Vector2(1.10,1.10),0.08).set_trans(Tween.TRANS_BACK)
+		label_pulse.tween_property(coin_label,"scale",Vector2.ONE,0.18)
 
 func create_floating_text(pos: Vector2, text_value: String, color: Color) -> void:
 	var label := Label.new()
@@ -1956,7 +2156,9 @@ func set_portal_active() -> void:
 func update_portal_charge() -> void:
 	if not is_instance_valid(portal) or total_coins<=0: return
 	var ratio := float(coins)/float(total_coins)
-	if is_instance_valid(portal_charge_bar): portal_charge_bar.value=coins
+	if is_instance_valid(portal_charge_bar):
+		portal_charge_bar.value=coins
+		update_fragment_liquid_fill()
 
 func create_portal_activation_fx() -> void:
 	if not is_instance_valid(portal): return
@@ -1976,19 +2178,20 @@ func create_portal_activation_fx() -> void:
 	pulse.tween_property(portal,"scale",Vector2(1.12,1.12),0.20).set_trans(Tween.TRANS_BACK)
 	pulse.tween_property(portal,"scale",Vector2.ONE,0.28)
 
-func create_collect_burst(pos: Vector2) -> void:
-	for i in 10:
+func create_collect_burst(pos: Vector2, duration := 0.32, count := 10) -> void:
+	if not is_instance_valid(world): return
+	for i in count:
 		var spark := Polygon2D.new()
 		spark.polygon = PackedVector2Array([Vector2(0,-3),Vector2(2,0),Vector2(0,3),Vector2(-2,0)])
 		spark.color = Color("#fff3ad") if i%2==0 else Color("#72e2c3")
 		spark.position = pos
-		spark.z_index = 12
+		spark.z_index = 41
 		world.add_child(spark)
-		var angle := TAU*float(i)/10.0
+		var angle := TAU*float(i)/float(count)
 		var target := pos+Vector2(cos(angle),sin(angle))*rng.randf_range(36,70)
-		var tween := create_tween()
-		tween.tween_property(spark,"position",target,0.32).set_trans(Tween.TRANS_QUAD)
-		tween.parallel().tween_property(spark,"modulate:a",0.0,0.32)
+		var tween := create_tween().bind_node(spark)
+		tween.tween_property(spark,"position",target,duration).set_trans(Tween.TRANS_QUAD)
+		tween.parallel().tween_property(spark,"modulate:a",0.0,duration)
 		tween.tween_callback(spark.queue_free)
 
 func create_enemy(kind: String, pos: Vector2) -> void:
@@ -2365,10 +2568,10 @@ func create_hud() -> void:
 	guard_bar = make_hud_progress(Color("#79bfff"),1.0)
 	guard_bar.custom_minimum_size = Vector2(190,7)
 	guard_row.add_child(guard_bar)
-	var fragment_panel := PanelContainer.new()
+	fragment_panel = PanelContainer.new()
 	fragment_panel.position = Vector2(376,10)
-	fragment_panel.size = Vector2(400,82)
-	fragment_panel.add_theme_stylebox_override("panel",ui_panel_style(Color(0.54,0.64,0.52,0.97),true))
+	fragment_panel.size = Vector2(400,90)
+	fragment_panel.add_theme_stylebox_override("panel",ui_panel_style(Color(0.58,0.56,0.40,0.97),true))
 	hud.add_child(fragment_panel)
 	coin_label = Label.new()
 	coin_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -2377,18 +2580,27 @@ func create_hud() -> void:
 	coin_label.add_theme_font_size_override("font_size",18)
 	coin_label.add_theme_color_override("font_color",Color("#ffe28a"))
 	var fragment_box := VBoxContainer.new()
-	fragment_box.add_theme_constant_override("separation",3)
+	fragment_box.add_theme_constant_override("separation",5)
 	fragment_panel.add_child(fragment_box)
 	fragment_box.add_child(coin_label)
-	portal_charge_bar = make_hud_progress(Color("#61dfc4"),maxi(total_coins,1))
-	portal_charge_bar.value=coins
-	portal_charge_bar.custom_minimum_size=Vector2(330,7)
-	fragment_box.add_child(portal_charge_bar)
+	var bar_row := HBoxContainer.new()
+	bar_row.add_theme_constant_override("separation",8)
+	bar_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	fragment_box.add_child(bar_row)
+	fragment_coin_icon = TextureRect.new()
+	if not COIN_SPIN_FRAMES.is_empty():
+		fragment_coin_icon.texture = COIN_SPIN_FRAMES[0]
+	fragment_coin_icon.custom_minimum_size = Vector2(22,22)
+	fragment_coin_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fragment_coin_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	fragment_coin_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	bar_row.add_child(fragment_coin_icon)
+	bar_row.add_child(make_fragment_charge_bar())
 	var portal_hint := Label.new()
 	portal_hint.text="CADA FRAGMENTO ACORDA O LIMIAR"
 	portal_hint.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	portal_hint.add_theme_font_size_override("font_size",9)
-	portal_hint.add_theme_color_override("font_color",Color("#91cbbd"))
+	portal_hint.add_theme_color_override("font_color",Color("#d4c07a"))
 	fragment_box.add_child(portal_hint)
 	var objective_panel := PanelContainer.new()
 	objective_panel.position = Vector2(804,8)
@@ -2506,6 +2718,58 @@ func make_hud_progress(color: Color, maximum: float) -> ProgressBar:
 	bar.add_theme_stylebox_override("fill",fill)
 	return bar
 
+func make_fragment_charge_bar() -> Control:
+	fragment_bar_host = Control.new()
+	fragment_bar_host.custom_minimum_size = Vector2(318, 16)
+	fragment_bar_host.clip_contents = false
+	fragment_bg_style = StyleBoxFlat.new()
+	fragment_bg_style.bg_color = Color(0.05, 0.07, 0.05, 0.96)
+	fragment_bg_style.border_color = Color("#c9a24e")
+	fragment_bg_style.set_border_width_all(2)
+	fragment_bg_style.set_corner_radius_all(8)
+	fragment_bg_style.shadow_color = Color(0.85, 0.62, 0.16, 0.32)
+	fragment_bg_style.shadow_size = 3
+	fragment_bg_style.anti_aliasing = true
+	var frame := Panel.new()
+	frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.add_theme_stylebox_override("panel", fragment_bg_style)
+	fragment_bar_host.add_child(frame)
+	fragment_liquid_clip = Control.new()
+	fragment_liquid_clip.set_anchors_preset(Control.PRESET_FULL_RECT)
+	fragment_liquid_clip.offset_left = 4.0
+	fragment_liquid_clip.offset_top = 4.0
+	fragment_liquid_clip.offset_right = -4.0
+	fragment_liquid_clip.offset_bottom = -4.0
+	fragment_liquid_clip.clip_contents = true
+	fragment_liquid_clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fragment_liquid_clip.resized.connect(update_fragment_liquid_fill)
+	fragment_bar_host.add_child(fragment_liquid_clip)
+	var liquid_mat := ShaderMaterial.new()
+	liquid_mat.shader = FRAGMENT_LIQUID_SHADER
+	fragment_liquid = ColorRect.new()
+	fragment_liquid.material = liquid_mat
+	fragment_liquid.color = Color.WHITE
+	fragment_liquid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fragment_liquid_clip.add_child(fragment_liquid)
+	fragment_shine = ColorRect.new()
+	fragment_shine.color = Color(1.0, 0.94, 0.62, 0.0)
+	fragment_shine.size = Vector2(16, 8)
+	fragment_shine.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fragment_liquid_clip.add_child(fragment_shine)
+	var empty := StyleBoxEmpty.new()
+	portal_charge_bar = ProgressBar.new()
+	portal_charge_bar.max_value = maxi(total_coins, 1)
+	portal_charge_bar.value = coins
+	portal_charge_bar.show_percentage = false
+	portal_charge_bar.visible = false
+	portal_charge_bar.add_theme_stylebox_override("background", empty)
+	portal_charge_bar.add_theme_stylebox_override("fill", empty)
+	portal_charge_bar.value_changed.connect(update_fragment_liquid_fill)
+	fragment_bar_host.add_child(portal_charge_bar)
+	call_deferred("update_fragment_liquid_fill")
+	return fragment_bar_host
+
 func update_hud() -> void:
 	if not is_instance_valid(health_label): return
 	health_label.text = ("JORGINHO  •  VIDA %d/%d" % [int(health),max_health]) if is_equal_approx(health,roundf(health)) else ("JORGINHO  •  VIDA %.1f/%d" % [health,max_health])
@@ -2515,7 +2779,9 @@ func update_hud() -> void:
 		heart_nodes[i].texture = HEART_FULL if fraction>0.0 else HEART_EMPTY
 		heart_nodes[i].modulate = Color(1.0,0.58,0.58,0.78) if fraction>0.0 and fraction<1.0 else Color.WHITE
 	coin_label.text = ("ARENA SELADA" if is_boss_level() else "◆  FRAGMENTOS   %d / %d" % [coins,total_coins])
-	if is_instance_valid(portal_charge_bar): portal_charge_bar.value=coins
+	if is_instance_valid(portal_charge_bar):
+		portal_charge_bar.value=coins
+		update_fragment_liquid_fill()
 	objective_label.text = "OBJETIVO\n" + ("Derrote %s" % current_boss_short_name() if is_boss_level() and not get_boss().is_empty() else ("Atravesse o portal desperto" if coins == total_coins else "Reúna todos os fragmentos"))
 	var boss := get_boss()
 	boss_label.text = ""
@@ -2646,6 +2912,8 @@ func _physics_process(delta: float) -> void:
 		start_dash(axis)
 	if dash_time > 0.0:
 		player.velocity = Vector2(dash_direction*DASH_SPEED,0)
+		if not player.is_on_floor():
+			fall_air_action = true
 	else:
 		var control_speed := player_move_speed*speed_multiplier*(0.72 if attack_time > 0.0 else 1.0)*(0.82 if player_slow_time>0.0 else 1.0)
 		player.velocity.x = move_toward(player.velocity.x,axis*control_speed,1500.0*delta)
@@ -2670,9 +2938,18 @@ func _physics_process(delta: float) -> void:
 		combo_window = 0.82
 		play_ui_sound("player_attack.wav",-13.0,0.96+float(combo_step)*0.05)
 	player.move_and_slide()
+	if was_on_floor and not player.is_on_floor():
+		fall_start_y = player.position.y
+		fall_air_action = false
 	if player.is_on_floor() and not was_on_floor:
 		jumps_left = 2
+		var drop := player.position.y - fall_start_y
 		if player.velocity.y>=0.0: play_ui_sound("player_land.wav",-16.0,rng.randf_range(0.94,1.05))
+		if drop >= HIGH_FALL_DROP and not fall_air_action and player.position.y >= HIGH_FALL_GROUND_Y:
+			spawn_high_fall_impact()
+			land_pose_time = 0.34
+			idle_stand_time = 0.0
+			idle_fidgeting = false
 	if player.is_on_floor() and absf(axis)>0.2 and dash_time<=0.0 and footstep_timer<=0.0:
 		var surface := "grass" if level<2 else ("concrete" if level<4 else "snow")
 		play_ui_sound("kenney/footstep_%s_%03d.ogg" % [surface,rng.randi_range(0,4)],-22.0,rng.randf_range(0.97,1.04))
@@ -2766,6 +3043,8 @@ func animate_guard_visual() -> void:
 
 func try_jump() -> bool:
 	if jumps_left<=0: return false
+	if not player.is_on_floor() and coyote_time<=0.0:
+		fall_air_action = true
 	player.velocity.y = -player_jump_force
 	jumps_left -= 1
 	play_ui_sound("player_jump.wav",-15.0,1.05 if jumps_left==0 else 0.95)
@@ -2816,6 +3095,63 @@ func create_target_hint(target: Node2D) -> void:
 	tween.parallel().tween_property(hint,"modulate:a",0.0,0.18)
 	tween.tween_callback(hint.queue_free)
 
+func impact_burst_rect(frame_index: int) -> Rect2:
+	var i := clampi(frame_index, 0, 2)
+	return Rect2(i * IMPACT_BURST_FRAME.x, 0, IMPACT_BURST_FRAME.x, IMPACT_BURST_FRAME.y)
+
+func spawn_high_fall_impact() -> void:
+	if not is_instance_valid(world) or not is_instance_valid(player): return
+	var feet := player.global_position + Vector2(0.0, 34.0)
+	var crack := Sprite2D.new()
+	crack.texture = IMPACT_CRACK
+	crack.centered = true
+	crack.position = feet + Vector2(0.0, 10.0)
+	crack.z_index = player.z_index - 3
+	crack.scale = Vector2(IMPACT_CRACK_SCALE * 0.55, IMPACT_CRACK_SCALE * 0.55)
+	crack.modulate = Color(1.0, 1.0, 1.0, 0.95)
+	crack.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	world.add_child(crack)
+	var burst := Sprite2D.new()
+	burst.texture = IMPACT_BURST
+	burst.centered = true
+	burst.region_enabled = true
+	burst.region_rect = impact_burst_rect(0)
+	burst.position = feet + Vector2(0.0, 4.0)
+	burst.z_index = player.z_index - 2
+	burst.scale = Vector2(IMPACT_BURST_SCALE * 0.42, IMPACT_BURST_SCALE * 0.42)
+	burst.modulate = Color(1.0, 1.0, 1.0, 0.96)
+	burst.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	world.add_child(burst)
+	var debris := Sprite2D.new()
+	debris.texture = IMPACT_DEBRIS
+	debris.centered = true
+	debris.position = feet + Vector2(0.0, -6.0)
+	debris.z_index = player.z_index - 1
+	debris.scale = Vector2(IMPACT_DEBRIS_SCALE * 0.40, IMPACT_DEBRIS_SCALE * 0.40)
+	debris.modulate = Color(1.0, 1.0, 1.0, 0.90)
+	debris.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	world.add_child(debris)
+	var crack_motion := create_tween().bind_node(crack)
+	crack_motion.tween_property(crack,"scale",Vector2(IMPACT_CRACK_SCALE, IMPACT_CRACK_SCALE * 0.92),0.10).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	crack_motion.tween_interval(0.28)
+	crack_motion.tween_property(crack,"modulate:a",0.0,0.55).set_trans(Tween.TRANS_SINE)
+	crack_motion.tween_callback(crack.queue_free)
+	var burst_motion := create_tween().bind_node(burst)
+	burst_motion.tween_callback(func(): burst.region_rect = impact_burst_rect(0))
+	burst_motion.tween_property(burst,"scale",Vector2(IMPACT_BURST_SCALE * 0.78, IMPACT_BURST_SCALE * 0.78),0.06).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	burst_motion.tween_callback(func(): burst.region_rect = impact_burst_rect(1))
+	burst_motion.tween_property(burst,"scale",Vector2(IMPACT_BURST_SCALE * 0.94, IMPACT_BURST_SCALE * 0.94),0.07)
+	burst_motion.tween_callback(func(): burst.region_rect = impact_burst_rect(2))
+	burst_motion.tween_property(burst,"scale",Vector2(IMPACT_BURST_SCALE, IMPACT_BURST_SCALE),0.08)
+	burst_motion.tween_property(burst,"modulate:a",0.0,0.28).set_trans(Tween.TRANS_SINE)
+	burst_motion.tween_callback(burst.queue_free)
+	var debris_motion := create_tween().bind_node(debris)
+	debris_motion.tween_property(debris,"scale",Vector2(IMPACT_DEBRIS_SCALE * 1.18, IMPACT_DEBRIS_SCALE * 1.08),0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	debris_motion.parallel().tween_property(debris,"position",feet + Vector2(0.0, -22.0),0.22).set_trans(Tween.TRANS_QUAD)
+	debris_motion.parallel().tween_property(debris,"modulate:a",0.0,0.26)
+	debris_motion.tween_callback(debris.queue_free)
+	shake_camera_once(6.0)
+
 func create_double_jump_fx() -> void:
 	var ring := Line2D.new()
 	var points := PackedVector2Array()
@@ -2834,13 +3170,33 @@ func create_double_jump_fx() -> void:
 	tween.tween_callback(ring.queue_free)
 
 func animate_player(delta: float, axis: float) -> void:
+	land_pose_time = maxf(0.0, land_pose_time - delta)
 	var anim := "idle"
 	if attack_time > 0:
 		anim = "jump_attack" if not player.is_on_floor() else ("attack_end" if combo_step == 3 else "attack")
+		idle_fidgeting = false
+		idle_stand_time = 0.0
+	elif land_pose_time > 0.0:
+		anim = "hurt"
 	elif not player.is_on_floor():
 		anim = "jump" if player.velocity.y < 0 else "fall"
+		idle_fidgeting = false
+		idle_stand_time = 0.0
 	elif abs(axis) > 0.1:
 		anim = "run"
+		idle_fidgeting = false
+		idle_stand_time = 0.0
+	else:
+		idle_stand_time += delta
+		if idle_fidgeting:
+			anim = "idle_fidget"
+			if anim_time >= IDLE_FIDGET_HOLD * 3.0:
+				idle_fidgeting = false
+				idle_stand_time = 0.0
+				anim = "idle"
+		elif idle_stand_time >= IDLE_FIDGET_DELAY:
+			idle_fidgeting = true
+			anim = "idle_fidget"
 	if anim!=last_player_anim:
 		anim_time = 0.0
 		last_player_anim = anim
@@ -2850,6 +3206,10 @@ func animate_player(delta: float, axis: float) -> void:
 	var frame := int(anim_time*(10.0 if anim=="run" else 7.0))%animation_coordinates.size()
 	if attack_time > 0.0:
 		frame = mini(animation_coordinates.size()-1,int((attack_elapsed/maxf(attack_duration,0.01))*float(animation_coordinates.size())))
+	elif anim == "hurt" and land_pose_time > 0.0:
+		frame = mini(animation_coordinates.size()-1, 1)
+	elif anim == "idle_fidget":
+		frame = mini(animation_coordinates.size()-1, int(anim_time / IDLE_FIDGET_HOLD))
 	player_sprite.region_rect = hero_frame_rect(anim,frame)
 	player_sprite.flip_h = facing < 0
 	if damage_flash_time > 0:
@@ -3979,9 +4339,9 @@ func create_guard_impact(perfect: bool) -> void:
 		play_ui_sound("kenney/impact_metal_heavy.ogg",-8.0,1.06)
 
 func flash_player_damage() -> void:
-	var base_scale := Vector2(1.35,1.35)
+	var base_scale := Vector2(HERO_SPRITE_SCALE,HERO_SPRITE_SCALE)
 	var squash := create_tween()
-	squash.tween_property(player_sprite,"scale",Vector2(1.55,1.12),0.07).set_trans(Tween.TRANS_QUAD)
+	squash.tween_property(player_sprite,"scale",Vector2(HERO_SPRITE_SCALE*1.15,HERO_SPRITE_SCALE*0.83),0.07).set_trans(Tween.TRANS_QUAD)
 	squash.tween_property(player_sprite,"scale",base_scale,0.19).set_trans(Tween.TRANS_BACK)
 	create_damage_particles()
 	if is_instance_valid(health_bar):
@@ -4057,7 +4417,7 @@ func transition_to_next_level() -> void:
 		var entry_target := portal.global_position+Vector2(0,-60)
 		var entry := create_tween().bind_node(player)
 		entry.tween_property(player,"global_position",entry_target,0.48).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		entry.parallel().tween_property(player,"scale",Vector2(0.32,0.32),0.48).set_trans(Tween.TRANS_BACK)
+		entry.parallel().tween_property(player,"scale",Vector2(0.22,0.22),0.48).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 		entry.parallel().tween_property(player,"modulate:a",0.0,0.42).set_delay(0.08)
 		entry.parallel().tween_property(portal_visual,"scale",Vector2(1.13,1.13),0.22).set_trans(Tween.TRANS_BACK)
 		entry.tween_property(portal_visual,"scale",Vector2.ONE,0.18)
