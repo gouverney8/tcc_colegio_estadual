@@ -52,6 +52,20 @@ Agora o resolve só dá um pulso de `HERO_CUTSCENE_SCALE * 1.06` e o portal enco
 
 A travessia de fase no portal do mapa também encolhe com `TRANS_QUAD` + `EASE_IN`.
 
+## Ultimate (conhecimento)
+
+Ativação: tecla **U** (ou **Y** no controle), só no chão. A carga **não gasta** os fragmentos do portal.
+
+| Constante | Valor | Função |
+| :--- | ---: | :--- |
+| `ULTIMATE_BASE_COST` | `10` | Primeira carga |
+| `ULTIMATE_DAMAGE_MULT` | `4` | Dano = ataque normal × 4 |
+| `ULTIMATE_BEAM_LENGTH` | `430` | Alcance horizontal |
+| `ULTIMATE_POSE_SCALE` | `0.52` | Tamanho da pose/FX |
+| `ULTIMATE_BEAM_SCALE` | `0.70` | Tamanho do feixe |
+
+Depois de usar, o próximo custo **dobra** (10 → 20 → 40). A carga soma cada moeda da jornada.
+
 ## Como desfazer
 
 ```gdscript

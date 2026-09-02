@@ -1,17 +1,19 @@
 <div align="center">
 
+<img src="capa_projeto.png" alt="Capa de Jorginho: Jornada Sem Retorno — explosão de conhecimento" width="920">
+
 # Jorginho: Jornada Sem Retorno
 
 **Trabalho de Conclusão de Curso · Jogos Digitais**
 
-Colégio Estadual de Paranavaí — E.F.M.N.P.
+Colégio Estadual de Paranavaí — E.F.M.N.P. · CEP
 
 [![Godot 4.7](https://img.shields.io/badge/Godot-4.7-478CBF?style=for-the-badge&logo=godotengine&logoColor=white)](https://godotengine.org/)
 [![Versão 2.0](https://img.shields.io/badge/versão-2.0.0-1B7F5A?style=for-the-badge)](#)
 [![Plataforma](https://img.shields.io/badge/plataforma-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)](#)
 [![Projeto](https://img.shields.io/badge/projeto-educacional-6F42C1?style=for-the-badge)](#)
 
-Jogo de ação e plataforma 2D em pixel art.
+Plataforma 2D de ação em pixel art.
 
 Explorar → lutar → coletar fragmentos → despertar o portal → avançar.
 
@@ -21,38 +23,36 @@ Explorar → lutar → coletar fragmentos → despertar o portal → avançar.
 
 ## Ficha acadêmica
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-
-**Identificação**
-
 | | |
 | :--- | :--- |
-| **Aluno** | Gustavo Bento Ouverney |
-| **Professor responsável** | Jackson A. Z. Savoldi |
-| **Orientador** | Carlos Alcantara |
-| **Curso** | Jogos Digitais |
-| **Instituição** | Colégio Estadual de Paranavaí — E.F.M.N.P. |
-| **Engine** | Godot 4.7 |
-| **Versão** | 2.0.0 |
+| **Aluno** | Gustavo Bento Ouverney — ideia, direção, programação e TCC |
+| **Professor responsável** | Jackson A. Z. Savoldi — estrutura do GitHub e arquitetura do jogo |
+| **Orientador** | Carlos Alcantara — orientação acadêmica |
+| **Curso / instituição** | Jogos Digitais · Colégio Estadual de Paranavaí — E.F.M.N.P. |
+| **Engine / versão** | Godot 4.7 · 2.0.0 |
 
-    </td>
-    <td width="50%" valign="top">
+> **Jackson A. Z. Savoldi** acompanhou a organização do repositório (pastas, documentação, créditos e publicação) e a arquitetura: cena principal, sistemas, fases editáveis e a separação entre código, assets e licenças. A implementação abaixo foi feita nessa linha de trabalho.
 
-**Papéis no projeto**
+---
 
-| Nome | Atuação |
+## O que implementamos com o professor Jackson
+
+Orientação de estrutura e arquitetura: **Jackson A. Z. Savoldi**.  
+Código e direção de jogo: **Gustavo Bento Ouverney**.
+
+| Frente | O que ficou no jogo |
 | :--- | :--- |
-| **Gustavo Bento Ouverney** | Ideia, direção, programação e TCC |
-| **Carlos Alcantara** | Orientação acadêmica do trabalho |
-| **Jackson A. Z. Savoldi** | Professor responsável; orientação de estrutura do GitHub e de arquitetura do jogo |
+| **Repositório e TCC** | Pastas limpas, `docs/`, créditos, `.gitignore` e publicação no GitHub |
+| **Arquitetura** | Um `main.tscn` + `main.gd`, áudio em Autoload, seis fases TileMap editáveis |
+| **Jorginho** | Folhas 256×256, escala calibrável, poses paradas, pés alinhados ao chão e às plataformas |
+| **Fragmentos CEP** | Moeda girando, sucção até a barra e portal que só abre com todos os fragmentos |
+| **Combate** | Ataque em combo, guarda, parry, dash, pulo duplo e arenas de chefe |
+| **Queda alta** | Rachadura, fumaça e pedras atrás dos pés ao cair do ponto mais alto até o chão |
+| **Ultimate** | Explosão de conhecimento (tecla **U**): 10 moedas para a primeira carga; o custo dobra depois; dano ×4; CEP e brasão no feixe |
+| **Prólogo** | Cutscene RPG do Limiar, sem o herói inchando ao ser puxado pelo portal |
+| **Calibração** | Constantes no topo de `main.gd` e guia em [docs/AJUSTE_PES_PLATAFORMA.md](docs/AJUSTE_PES_PLATAFORMA.md) |
 
-    </td>
-  </tr>
-</table>
-
-> **Jackson A. Z. Savoldi** orientou a organização deste repositório (pastas, documentação, créditos e publicação) e a arquitetura do jogo (cena principal, sistemas, fases editáveis e separação entre código, assets e licenças).
+A capa do projeto (`capa_projeto.png`) mostra essa ultimate: livros, código, CEP e o Paraná no feixe do Jorginho.
 
 ---
 
@@ -71,13 +71,11 @@ flowchart LR
     G --> E
 ```
 
-Nas arenas de chefe o portal permanece invisível até a derrota do Guardião. Depois disso ele aparece com luz, som e animação.
+Nas arenas de chefe o portal só aparece depois da derrota do Guardião.
 
 ---
 
-## Arquitetura do jogo
-
-Orientação de estrutura: **Jackson A. Z. Savoldi**. Implementação: **Gustavo Bento Ouverney**.
+## Arquitetura
 
 ```mermaid
 flowchart TB
@@ -86,16 +84,16 @@ flowchart TB
         M[main.tscn]
     end
 
-    subgraph Sistemas["Sistemas em scripts/"]
-        G[main.gd — jogador, combate, HUD, menus]
+    subgraph Sistemas["scripts/"]
+        G[main.gd — jogador, combate, HUD, ultimate]
         A[audio_manager.gd — Autoload]
-        S[transition.gdshader]
+        S[shaders]
     end
 
-    subgraph Conteudo["Conteúdo jogável"]
-        L[scenes/levels — 6 fases TileMap]
-        AS[assets/ — arte, música e SFX]
-        C[credits/ — licenças originais]
+    subgraph Conteudo["conteúdo"]
+        L[scenes/levels — 6 fases]
+        AS[assets — arte, música, SFX]
+        C[credits — licenças]
     end
 
     P --> M
@@ -107,31 +105,30 @@ flowchart TB
     G --> C
 ```
 
-| Camada | Pasta / arquivo | Função |
+| Camada | Onde | Função |
 | :--- | :--- | :--- |
-| Motor | `project.godot` | Nome, versão 2.0.0, InputMap, Autoload de áudio |
-| Entrada | `main.tscn` | Cena principal do jogo |
-| Gameplay | `scripts/main.gd` | Player, combate, portal, chefes, HUD e menus |
-| Áudio | `scripts/systems/audio_manager.gd` | Música e efeitos com fade |
-| Fases | `scenes/levels/` | Seis mapas editáveis no editor |
-| Arte | `assets/` | Sprites, tiles, UI, músicas e SFX usados no runtime |
-| Licenças | `credits/` | Textos e PDFs originais dos pacotes de terceiros |
-| Documentação | `docs/` | Como rodar, créditos, guia e atividade da amostra |
+| Motor | `project.godot` | Nome, versão, InputMap, Autoload |
+| Cena | `main.tscn` | Entrada do jogo |
+| Gameplay | `scripts/main.gd` | Player, combate, portal, chefes, HUD, ultimate |
+| Áudio | `scripts/systems/audio_manager.gd` | Música e SFX com fade |
+| Fases | `scenes/levels/` | Seis mapas editáveis no Godot |
+| Arte | `assets/` | Sprites, tiles, UI, músicas e SFX |
+| Licenças | `credits/` | Textos e PDFs dos pacotes |
+| Capa | `capa_projeto.png` | Imagem de capa do TCC / README |
+| Docs | `docs/` | Como rodar, créditos, guia e histórico |
 
 ---
 
 ## Como executar
 
-O passo a passo completo está em **[docs/COMO_RODAR.md](docs/COMO_RODAR.md)**.
+Passo a passo: **[docs/COMO_RODAR.md](docs/COMO_RODAR.md)**. Exportar `.exe`: [docs/COMO_EXPORTAR.md](docs/COMO_EXPORTAR.md).
 
-| Etapa | O que fazer |
+| | |
 | :---: | :--- |
-| **1** | Instalar o [Godot 4.7](https://godotengine.org/download) (versão estável, Standard) |
+| **1** | Instalar o [Godot 4.7](https://godotengine.org/download) (Standard, estável) |
 | **2** | Clonar este repositório |
-| **3** | No Godot, **Importar** a pasta `Jorginho_Jornada_Sem_Retorno` (`project.godot`) |
-| **4** | Pressionar **F5** para jogar |
-
-Para gerar um `.exe` do Windows: [docs/COMO_EXPORTAR.md](docs/COMO_EXPORTAR.md).
+| **3** | No Godot, **Importar** a pasta `Jorginho_Jornada_Sem_Retorno` |
+| **4** | Pressionar **F5** |
 
 ```bash
 git clone git@github.com:gouverney8/tcc_colegio_estadual.git
@@ -142,7 +139,7 @@ cd tcc_colegio_estadual
 
 ## Controles
 
-Os comandos podem ser remapeados no menu de configurações.
+Remapeáveis no menu de configurações.
 
 | Ação | Teclado | Controle |
 | :--- | :--- | :---: |
@@ -151,23 +148,26 @@ Os comandos podem ser remapeados no menu de configurações.
 | Atacar | Clique esquerdo, `J` ou `Z` | **X** |
 | Guardar / aparar | Clique direito ou `K` | **LB** |
 | Impulso | `Shift` | **B** |
+| Ultimate | `U` | **Y** |
 | Pausar | `Esc` | **Start** |
-| Avançar fase (modo desenvolvedor) | `K` + `J` ao mesmo tempo | — |
+| Avançar fase (desenvolvedor) | `K` + `J` | — |
+
+A primeira ultimate pede **10 fragmentos** coletados na jornada. Depois o custo **dobra** (20, 40…). Os fragmentos do portal **não são gastos**. Só ativa no chão. Dano = ataque normal × 4.
 
 ### Dificuldades
 
-| Limiar | Nome | Perfil |
+| | Nome | Perfil |
 | :---: | :--- | :--- |
-| 1 | Trilha dos Vaga-Lumes | Ritmo mais guiado, inimigos mais brandos |
-| 2 | Passos pelo Limiar | Ritmo original da jornada |
+| 1 | Trilha dos Vaga-Lumes | Ritmo mais guiado |
+| 2 | Passos pelo Limiar | Ritmo original |
 | 3 | Jornada sem Retorno | Combate mais exigente |
-| 4 | Eclipse do Último Portal | Maior pressão de dano, velocidade e chefes |
+| 4 | Eclipse do Último Portal | Maior pressão de dano e chefes |
 
 ---
 
 ## Campanha
 
-Seis fases em `Jorginho_Jornada_Sem_Retorno/scenes/levels`. Cada cena tem TileMap, início do Jorginho, posição do portal, fragmentos, inimigos e vidas escondidas. Mudar esses marcadores no editor muda a fase de verdade.
+Seis fases em `Jorginho_Jornada_Sem_Retorno/scenes/levels`. TileMap, início, portal, fragmentos e inimigos se editam no Godot.
 
 ```mermaid
 flowchart LR
@@ -178,7 +178,7 @@ flowchart LR
     F5 --> F6[6. Trono do Inverno]
 ```
 
-| Fase | Cena | Bioma |
+| | Cena | Bioma |
 | :---: | :--- | :--- |
 | 1 | `fase_01_floresta_da_ilusao.tscn` | Floresta |
 | 2 | `fase_02_covil_das_raizes.tscn` | Raízes / covil |
@@ -196,13 +196,15 @@ Organização acompanhada nas orientações de GitHub do professor **Jackson A. 
 ```
 tcc_colegio_estadual/
 ├── README.md
-├── docs/                                  documentação final do TCC
+├── capa_projeto.png                       capa do TCC e deste README
+├── docs/
 │   ├── COMO_RODAR.md
 │   ├── COMO_EXPORTAR.md
 │   ├── CREDITOS.md
 │   ├── GUIA_DO_PROJETO.md
 │   ├── CHANGELOG.md
 │   ├── AJUSTE_PES_PLATAFORMA.md
+│   ├── HEROI_SPRITES.md
 │   └── atividade-amostra-de-cursos-2026.docx
 └── Jorginho_Jornada_Sem_Retorno/          projeto Godot
     ├── project.godot
@@ -215,28 +217,28 @@ tcc_colegio_estadual/
 
 | Documento | Conteúdo |
 | :--- | :--- |
-| [Como rodar o jogo](docs/COMO_RODAR.md) | Instalação do Godot, importação e execução |
-| [Como exportar](docs/COMO_EXPORTAR.md) | Geração do executável Windows |
-| [Guia do projeto](docs/GUIA_DO_PROJETO.md) | Onde está cada sistema e roteiro de apresentação |
-| [Créditos e licenças](docs/CREDITOS.md) | Autoria e contribuições de outros projetos |
-| [Assets selecionados](docs/ASSETS_SELECIONADOS.md) | Critério de escolha da arte e do áudio |
-| [Histórico de versões](docs/CHANGELOG.md) | Evolução do jogo |
-| [Ajuste dos pés nas plataformas](docs/AJUSTE_PES_PLATAFORMA.md) | Alinhamento chão/sprite e como desfazer |
-| [Sprites do Jorginho](docs/HEROI_SPRITES.md) | Folhas novas, nomes e como desfazer |
-| [Análise geral](docs/ANALISE_GERAL_DO_JOGO.md) | Problemas encontrados e soluções |
+| [Como rodar](docs/COMO_RODAR.md) | Instalação do Godot e execução |
+| [Como exportar](docs/COMO_EXPORTAR.md) | Executável Windows |
+| [Guia do projeto](docs/GUIA_DO_PROJETO.md) | Sistemas e roteiro de apresentação |
+| [Créditos](docs/CREDITOS.md) | Autoria e pacotes de terceiros |
+| [Histórico](docs/CHANGELOG.md) | Evolução do jogo |
+| [Ajustes manuais](docs/AJUSTE_PES_PLATAFORMA.md) | Pés, escala, ultimate e prólogo |
+| [Sprites do Jorginho](docs/HEROI_SPRITES.md) | Folhas novas e como desfazer |
 
 ---
 
 ## Créditos
 
-O código, a direção e o TCC são de **Gustavo Bento Ouverney**.
+Código, direção e TCC: **Gustavo Bento Ouverney**.  
+Estrutura do repositório e arquitetura: orientação de **Jackson A. Z. Savoldi**.  
+Orientação acadêmica: **Carlos Alcantara**.
 
-O jogo utiliza arte, música e efeitos de vários autores e pacotes (Kenney, ElvGames, Ozzbit Games, Analog Studios, CraftPix, AlkaKrab e outros). A lista completa está em:
+Arte, música e SFX de Kenney, ElvGames, Ozzbit Games, Analog Studios, CraftPix, AlkaKrab e outros. Lista completa:
 
-- **[docs/CREDITOS.md](docs/CREDITOS.md)** — documento final de créditos
-- **[Jorginho_Jornada_Sem_Retorno/credits/](Jorginho_Jornada_Sem_Retorno/credits/)** — PDFs e textos de licença dos pacotes
+- **[docs/CREDITOS.md](docs/CREDITOS.md)**
+- **[Jorginho_Jornada_Sem_Retorno/credits/](Jorginho_Jornada_Sem_Retorno/credits/)**
 
-Este é um projeto educacional. Antes de republicar ou comercializar, confira os termos de cada pacote.
+Projeto educacional. Antes de republicar ou comercializar, confira os termos de cada pacote.
 
 ---
 

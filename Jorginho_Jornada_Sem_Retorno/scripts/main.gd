@@ -85,6 +85,26 @@ const IMPACT_BURST_FRAME := Vector2i(384, 320)
 const IMPACT_BURST_SCALE := 0.42
 const IMPACT_CRACK_SCALE := 0.28
 const IMPACT_DEBRIS_SCALE := 0.34
+const ULTIMATE_SHEET: Texture2D = preload("res://assets/utimete/ultimate_charge.png")
+const ULTIMATE_CONVERGE: Texture2D = preload("res://assets/utimete/ultimate_converge.png")
+const ULTIMATE_CAST: Texture2D = preload("res://assets/utimete/ultimate_cast.png")
+const ULTIMATE_BEAM: Texture2D = preload("res://assets/utimete/ultimate_beam.png")
+const ULTIMATE_IMPACT: Texture2D = preload("res://assets/utimete/ultimate_impact.png")
+const ULTIMATE_SMOKE: Texture2D = preload("res://assets/utimete/ultimate_smoke.png")
+const ULTIMATE_BASE_COST := 10
+const ULTIMATE_CHARGE_FRAMES := 7
+const ULTIMATE_CHARGE_CELL := Vector2i(280, 280)
+const ULTIMATE_CONVERGE_CELL := Vector2i(320, 300)
+const ULTIMATE_IMPACT_CELL := Vector2i(420, 240)
+const ULTIMATE_SMOKE_CELL := Vector2i(256, 176)
+const ULTIMATE_POSE_SCALE := 0.52
+const ULTIMATE_POSE_FEET_TUNE := 0.0
+const ULTIMATE_BEAM_SCALE := 0.70
+const ULTIMATE_IMPACT_SCALE := 0.58
+const ULTIMATE_SMOKE_SCALE := 0.50
+const ULTIMATE_DAMAGE_MULT := 4
+const ULTIMATE_BEAM_LENGTH := 430.0
+const ULTIMATE_BEAM_HEIGHT := 96.0
 const IDLE_FIDGET_DELAY := 5.5
 const IDLE_FIDGET_HOLD := 0.95
 const HIGH_FALL_DROP := 180.0
@@ -124,7 +144,7 @@ const LEVEL_SCENES := [
 ]
 const PARRY_WINDOW := 0.18
 const BLOCK_DAMAGE_RATIO := 0.35
-const GAMEPAD_LABELS := {"move_left":"ANALÓGICO / ◀","move_right":"ANALÓGICO / ▶","jump":"A","attack":"X","guard":"LB","dash":"B","pause":"START"}
+const GAMEPAD_LABELS := {"move_left":"ANALÓGICO / ◀","move_right":"ANALÓGICO / ▶","jump":"A","attack":"X","guard":"LB","dash":"B","ultimate":"Y","pause":"START"}
 const EVENT_SFX := {
 	"parry_cue":"kenney/ui_toggle.ogg",
 	"posture_break":"kenney/impact_metal_heavy.ogg",
@@ -266,6 +286,17 @@ var fragment_coin_icon: TextureRect
 var fragment_glow_tween: Tween
 var combat_chain := 0
 var combat_chain_time := 0.0
+var ultimate_charge := 0
+var ultimate_cost := ULTIMATE_BASE_COST
+var ultimate_active := false
+var ultimate_hit_done := false
+var ultimate_visual: Sprite2D
+var ultimate_beam_sprite: Sprite2D
+var ultimate_bar: ProgressBar
+var ultimate_label: Label
+var ultimate_bar_host: Control
+var ultimate_glow_tween: Tween
+var ultimate_lock_position := Vector2.ZERO
 
 enum TelegraphType { GROUND_AREA, GROUND_LINE, ARC, CHARGE, AIM, RADIAL }
 
@@ -346,6 +377,7 @@ func _ready() -> void:
 	reset_exhibition_session()
 	Input.set_custom_mouse_cursor(UI_CURSOR,Input.CURSOR_ARROW,Vector2(2,2))
 	load_settings()
+	ensure_ultimate_input()
 	hero_textures = {
 		"idle": HERO_IDLE,
 		"run": HERO_RUN,
@@ -389,16 +421,15 @@ func _process(delta: float) -> void:
 			layer_node.position = Vector2(-mouse_parallax.x*depth*7.0,-mouse_parallax.y*depth*4.0+sin(menu_walk_time*0.35+depth)*depth)
 
 func clear_screen() -> void:
-	# Libera na hora para o parallax da fase anterior não ficar visível
-	# por baixo da fase nova (queue_free só some no fim do frame).
+	# Esconde na hora (sem um frame do parallax antigo) e só apaga no fim do
+	# frame. free() no meio do sinal pressed do botão gerava o erro do Object.
 	var keep := ["JorginhoMusic","LevelTransition"]
 	var doomed: Array[Node] = []
 	for child in get_children():
 		if child.name not in keep:
 			doomed.append(child)
 	for child in doomed:
-		remove_child(child)
-		child.free()
+		retire_screen_node(child)
 	world = null
 	hud = null
 	boss_hud_bar = null
@@ -415,6 +446,14 @@ func clear_screen() -> void:
 	fragment_liquid_clip = null
 	fragment_coin_icon = null
 	fragment_glow_tween = null
+	ultimate_bar = null
+	ultimate_label = null
+	ultimate_bar_host = null
+	ultimate_glow_tween = null
+	ultimate_visual = null
+	ultimate_beam_sprite = null
+	ultimate_active = false
+	ultimate_hit_done = false
 	guard_bar = null
 	guard_label = null
 	guard_button = null
@@ -428,6 +467,18 @@ func clear_screen() -> void:
 	projectiles.clear()
 	coin_nodes.clear()
 	life_drops.clear()
+
+func retire_screen_node(child: Node) -> void:
+	if not is_instance_valid(child):
+		return
+	if child is CanvasLayer:
+		(child as CanvasLayer).visible = false
+	elif child is CanvasItem:
+		(child as CanvasItem).visible = false
+	child.process_mode = Node.PROCESS_MODE_DISABLED
+	if child.get_parent() == self:
+		remove_child(child)
+	child.queue_free()
 
 func panel_style(color: Color, border := Color("#55d6be"), radius := 14) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -632,7 +683,7 @@ func show_menu() -> void:
 	options.add_spacer(false)
 	if has_save():
 		var continue_button := make_menu_button("CONTINUAR ESTA SESSÃO")
-		continue_button.pressed.connect(continue_game)
+		continue_button.pressed.connect(func(): call_deferred("continue_game"))
 		options.add_child(continue_button)
 	var play := make_menu_button("NOVA JORNADA")
 	play.pressed.connect(show_difficulty_selection)
@@ -796,7 +847,7 @@ func show_settings() -> void:
 	var instruction := Label.new(); instruction.text="Selecione uma ação e pressione a nova tecla. ESC cancela. Controle: analógico/D-pad, A pula, X ataca, LB guarda/apara, B impulsiona e Start pausa."; instruction.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; instruction.custom_minimum_size.y=40; instruction.add_theme_color_override("font_color",Color("#9be8cf")); controls.add_child(instruction)
 	var controls_grid := GridContainer.new(); controls_grid.columns=2; controls_grid.add_theme_constant_override("h_separation",24); controls_grid.add_theme_constant_override("v_separation",4); controls.add_child(controls_grid)
 	remap_buttons.clear()
-	var actions := {"move_left":"MOVER PARA A ESQUERDA","move_right":"MOVER PARA A DIREITA","jump":"PULAR","attack":"ATACAR","guard":"GUARDA / APARAR","dash":"IMPULSO","pause":"PAUSAR"}
+	var actions := {"move_left":"MOVER PARA A ESQUERDA","move_right":"MOVER PARA A DIREITA","jump":"PULAR","attack":"ATACAR","guard":"GUARDA / APARAR","dash":"IMPULSO","ultimate":"ULTIMATE","pause":"PAUSAR"}
 	for action in actions:
 		var action_label := Label.new(); action_label.text=actions[action]; action_label.custom_minimum_size.x=265; controls_grid.add_child(action_label)
 		var key_button := Button.new(); key_button.text=get_action_key(action); key_button.custom_minimum_size=Vector2(220,32); key_button.pressed.connect(begin_remap.bind(action,key_button)); controls_grid.add_child(key_button); remap_buttons[action]=key_button
@@ -884,7 +935,7 @@ func get_action_key(action: String) -> String:
 	return "—"
 
 func restore_default_controls() -> void:
-	var defaults := {"move_left":KEY_A,"move_right":KEY_D,"jump":KEY_SPACE,"attack":KEY_J,"guard":KEY_K,"dash":KEY_SHIFT,"pause":KEY_ESCAPE}
+	var defaults := {"move_left":KEY_A,"move_right":KEY_D,"jump":KEY_SPACE,"attack":KEY_J,"guard":KEY_K,"dash":KEY_SHIFT,"ultimate":KEY_U,"pause":KEY_ESCAPE}
 	for action in defaults:
 		replace_action_key(action,defaults[action])
 		if remap_buttons.has(action) and is_instance_valid(remap_buttons[action]): remap_buttons[action].text=get_action_key(action)
@@ -930,7 +981,7 @@ func show_difficulty_selection() -> void:
 	difficulty_preview_label=Label.new(); difficulty_preview_label.name="DifficultyPreview"; difficulty_preview_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER; difficulty_preview_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; difficulty_preview_label.custom_minimum_size.y=44; difficulty_preview_label.add_theme_color_override("font_color",Color("#ffe59a")); box.add_child(difficulty_preview_label); update_difficulty_preview()
 	var footer := HBoxContainer.new(); footer.alignment=BoxContainer.ALIGNMENT_CENTER; footer.add_theme_constant_override("separation",12); box.add_child(footer)
 	var back := make_button("VOLTAR",230); back.custom_minimum_size.y=44; back.pressed.connect(close_menu_modal); footer.add_child(back)
-	var begin := make_button("ATRAVESSAR O PORTAL",320); begin.custom_minimum_size.y=44; begin.pressed.connect(func(): difficulty_index=selected_difficulty_index; show_origin_cutscene()); footer.add_child(begin)
+	var begin := make_button("ATRAVESSAR O PORTAL",320); begin.custom_minimum_size.y=44; begin.pressed.connect(func(): difficulty_index=selected_difficulty_index; call_deferred("show_origin_cutscene")); footer.add_child(begin)
 
 func update_difficulty_preview() -> void:
 	if not is_instance_valid(difficulty_preview_label): return
@@ -967,6 +1018,9 @@ func start_game() -> void:
 	deaths = 0
 	seen_attack_tips.clear()
 	player_slow_time = 0.0
+	ultimate_charge = 0
+	ultimate_cost = ULTIMATE_BASE_COST
+	ultimate_active = false
 	save_progress()
 	load_level()
 
@@ -1136,7 +1190,7 @@ func show_origin_cutscene() -> void:
 	skip.custom_minimum_size.y = 38
 	skip.z_index = 10
 	layer.add_child(skip)
-	skip.pressed.connect(func(): finish_origin_cutscene(token))
+	skip.pressed.connect(func(): call_deferred("finish_origin_cutscene", token))
 	var beats := [
 		{"speaker":"NARRADOR","text":"Na aldeia, todos conheciam a história do Limiar: uma porta antiga que só respondia quando os mundos corriam perigo.","x":265.0,"hold":3.8,"action":"walk"},
 		{"speaker":"NARRADOR","text":"Jorginho nunca acreditou completamente. Mesmo assim, guardava o medalhão deixado por sua avó e a promessa de não fugir do desconhecido.","x":430.0,"hold":4.2,"action":"walk"},
@@ -1324,7 +1378,7 @@ func load_settings() -> void:
 			else:
 				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 				DisplayServer.window_set_size(windowed_resolution)
-		for action in ["move_left","move_right","jump","attack","guard","dash","pause"]:
+		for action in ["move_left","move_right","jump","attack","guard","dash","ultimate","pause"]:
 			var keycode := int(settings.get_value("controls",action,0))
 			if keycode>0:
 				replace_action_key(action,keycode)
@@ -1342,7 +1396,7 @@ func save_settings() -> void:
 	settings.set_value("display","width",windowed_resolution.x)
 	settings.set_value("display","height",windowed_resolution.y)
 	settings.set_value("display","visual_scale",visual_scale)
-	for action in ["move_left","move_right","jump","attack","guard","dash","pause"]:
+	for action in ["move_left","move_right","jump","attack","guard","dash","ultimate","pause"]:
 		for event in InputMap.action_get_events(action):
 			if event is InputEventKey:
 				settings.set_value("controls",action,event.physical_keycode)
@@ -1905,6 +1959,8 @@ func create_player(pos: Vector2) -> void:
 	land_pose_time = 0.0
 	fall_start_y = 0.0
 	fall_air_action = false
+	ultimate_active = false
+	ultimate_hit_done = false
 
 func create_coin(pos: Vector2) -> void:
 	var area := Area2D.new()
@@ -1944,6 +2000,7 @@ func collect_coin(area: Area2D) -> void:
 	area.set_meta("collected",true)
 	area.set_deferred("monitoring",false)
 	coins += 1
+	ultimate_charge += 1
 	coin_nodes.erase(area)
 	create_floating_text(area.position,"+1 FRAGMENTO",Color("#ffe15b"))
 	play_ui_sound("fragment_pickup.wav",-10.0,rng.randf_range(0.96,1.08))
@@ -1957,6 +2014,9 @@ func collect_coin(area: Area2D) -> void:
 		flash_message("PORTAL DESBLOQUEADO!", Color("#7dffcf"))
 	else:
 		flash_message("FRAGMENTO ENCONTRADO  %d/%d" % [coins,total_coins], Color("#ffe28a"))
+	if ultimate_charge == ultimate_cost:
+		flash_message("ULTIMATE PRONTA  •  %s" % action_prompt("ultimate"), Color("#9dff72"))
+	update_ultimate_hud()
 
 func fragment_bar_canvas_position() -> Vector2:
 	if is_instance_valid(portal_charge_bar):
@@ -2517,7 +2577,7 @@ func create_hud() -> void:
 	add_child(hud)
 	var status_panel := PanelContainer.new()
 	status_panel.position = Vector2(10,8)
-	status_panel.size = Vector2(332,142)
+	status_panel.size = Vector2(332,168)
 	status_panel.add_theme_stylebox_override("panel",ui_panel_style(Color(0.62,0.48,0.40,0.98),true))
 	hud.add_child(status_panel)
 	var status := VBoxContainer.new()
@@ -2568,6 +2628,18 @@ func create_hud() -> void:
 	guard_bar = make_hud_progress(Color("#79bfff"),1.0)
 	guard_bar.custom_minimum_size = Vector2(190,7)
 	guard_row.add_child(guard_bar)
+	var ultimate_row := HBoxContainer.new()
+	status.add_child(ultimate_row)
+	ultimate_label = Label.new()
+	ultimate_label.text = "ULTIMATE  "
+	ultimate_label.custom_minimum_size.x = 66
+	ultimate_label.add_theme_font_size_override("font_size",12)
+	ultimate_label.add_theme_color_override("font_color",Color("#9dff72"))
+	ultimate_row.add_child(ultimate_label)
+	ultimate_bar = make_hud_progress(Color("#61dfc4"),1.0)
+	ultimate_bar.custom_minimum_size = Vector2(190,7)
+	ultimate_row.add_child(ultimate_bar)
+	ultimate_bar_host = ultimate_bar
 	fragment_panel = PanelContainer.new()
 	fragment_panel.position = Vector2(376,10)
 	fragment_panel.size = Vector2(400,90)
@@ -2700,7 +2772,20 @@ func create_hud() -> void:
 	guard_button.button_down.connect(start_guard)
 	guard_button.button_up.connect(stop_guard)
 	hud.add_child(guard_button)
+	var ultimate_button := Button.new()
+	ultimate_button.text = "ULTIMATE\n%s" % action_prompt("ultimate")
+	ultimate_button.position = Vector2(220,158)
+	ultimate_button.size = Vector2(122,58)
+	ultimate_button.focus_mode = Control.FOCUS_NONE
+	ultimate_button.add_theme_font_size_override("font_size",12)
+	ultimate_button.add_theme_color_override("font_color",Color("#d8ffe8"))
+	ultimate_button.add_theme_stylebox_override("normal",ui_texture_style(UI_BUTTON,Color(0.28,0.72,0.62,0.96),52.0,34.0))
+	ultimate_button.add_theme_stylebox_override("hover",ui_texture_style(UI_BUTTON,Color(0.42,0.92,0.78,1.0),52.0,34.0))
+	ultimate_button.add_theme_stylebox_override("pressed",ui_texture_style(UI_BUTTON,Color(0.62,1.10,0.92,1.0),52.0,34.0))
+	ultimate_button.pressed.connect(try_ultimate)
+	hud.add_child(ultimate_button)
 	update_hud()
+	update_ultimate_hud()
 
 func make_hud_progress(color: Color, maximum: float) -> ProgressBar:
 	var bar := ProgressBar.new()
@@ -2816,6 +2901,7 @@ func update_dynamic_hud() -> void:
 	if is_instance_valid(guard_label):
 		guard_label.text = "APAROU!  " if parry_time>0.0 else ("GUARDA  " if guarding else "APARAR  ")
 		guard_label.add_theme_color_override("font_color",Color("#fff3a8") if parry_time>0.0 else Color("#8ecbff"))
+	update_ultimate_hud()
 	var current_second := int(run_time)
 	if current_second != last_hud_second:
 		last_hud_second = current_second
@@ -2897,7 +2983,13 @@ func _physics_process(delta: float) -> void:
 	else:
 		coyote_time = maxf(0.0,coyote_time-delta)
 	var axis := Input.get_axis("move_left","move_right")
-	if Input.is_action_pressed("guard") and not guarding:
+	if ultimate_active:
+		axis = 0.0
+		if guarding:
+			stop_guard()
+		player.velocity = Vector2.ZERO
+		player.global_position = ultimate_lock_position
+	elif Input.is_action_pressed("guard") and not guarding:
 		start_guard()
 	elif not Input.is_action_pressed("guard") and guarding and not (is_instance_valid(guard_button) and guard_button.button_pressed):
 		stop_guard()
@@ -2908,9 +3000,12 @@ func _physics_process(delta: float) -> void:
 	if is_instance_valid(camera):
 		var look_ahead := facing*92.0 if absf(axis)>0.15 else facing*64.0
 		camera.position.x=lerpf(camera.position.x,look_ahead,clampf(delta*5.5,0.0,1.0))
-	if Input.is_action_just_pressed("dash") and dash_cooldown <= 0.0 and dash_time <= 0.0 and not guarding:
+	if Input.is_action_just_pressed("dash") and dash_cooldown <= 0.0 and dash_time <= 0.0 and not guarding and not ultimate_active:
 		start_dash(axis)
-	if dash_time > 0.0:
+	if ultimate_active:
+		player.velocity = Vector2.ZERO
+		player.global_position = ultimate_lock_position
+	elif dash_time > 0.0:
 		player.velocity = Vector2(dash_direction*DASH_SPEED,0)
 		if not player.is_on_floor():
 			fall_air_action = true
@@ -2925,7 +3020,7 @@ func _physics_process(delta: float) -> void:
 			coyote_time = 0.0
 		if Input.is_action_just_released("jump") and player.velocity.y < -250:
 			player.velocity.y = -250
-	if Input.is_action_just_pressed("attack") and attack_time <= 0.0 and dash_time <= 0.0 and not guarding:
+	if Input.is_action_just_pressed("attack") and attack_time <= 0.0 and dash_time <= 0.0 and not guarding and not ultimate_active:
 		attack_direction = get_assisted_attack_direction()
 		if is_instance_valid(assisted_target): create_target_hint(assisted_target)
 		if abs(attack_direction.x)>0.12: facing = sign(attack_direction.x)
@@ -2937,7 +3032,12 @@ func _physics_process(delta: float) -> void:
 		attack_hit_done = false
 		combo_window = 0.82
 		play_ui_sound("player_attack.wav",-13.0,0.96+float(combo_step)*0.05)
+	if Input.is_action_just_pressed("ultimate"):
+		try_ultimate()
 	player.move_and_slide()
+	if ultimate_active:
+		player.velocity = Vector2.ZERO
+		player.global_position = ultimate_lock_position
 	if was_on_floor and not player.is_on_floor():
 		fall_start_y = player.position.y
 		fall_air_action = false
@@ -3010,7 +3110,7 @@ func start_dash(axis: float = 0.0) -> void:
 	create_dash_fx()
 
 func start_guard() -> void:
-	if state!="playing" or guarding or guard_recovery>0.0 or attack_time>0.0 or dash_time>0.0 or not is_instance_valid(player): return
+	if state!="playing" or ultimate_active or guarding or guard_recovery>0.0 or attack_time>0.0 or dash_time>0.0 or not is_instance_valid(player): return
 	guarding = true
 	parry_time = effective_parry_window()
 	player.velocity.x *= 0.35
@@ -3042,6 +3142,7 @@ func animate_guard_visual() -> void:
 	guard_visual.flip_h = facing<0.0
 
 func try_jump() -> bool:
+	if ultimate_active: return false
 	if jumps_left<=0: return false
 	if not player.is_on_floor() and coyote_time<=0.0:
 		fall_air_action = true
@@ -3152,6 +3253,316 @@ func spawn_high_fall_impact() -> void:
 	debris_motion.tween_callback(debris.queue_free)
 	shake_camera_once(6.0)
 
+func ensure_ultimate_input() -> void:
+	if not InputMap.has_action("ultimate"):
+		InputMap.add_action("ultimate")
+	if InputMap.action_get_events("ultimate").is_empty():
+		var key := InputEventKey.new()
+		key.physical_keycode = KEY_U
+		InputMap.action_add_event("ultimate", key)
+		var pad := InputEventJoypadButton.new()
+		pad.button_index = 3
+		InputMap.action_add_event("ultimate", pad)
+
+func update_ultimate_hud() -> void:
+	if is_instance_valid(ultimate_bar):
+		ultimate_bar.max_value = float(maxi(ultimate_cost, 1))
+		ultimate_bar.value = float(mini(ultimate_charge, ultimate_cost))
+	var ready_now := ultimate_charge >= ultimate_cost and not ultimate_active
+	if is_instance_valid(ultimate_label):
+		if ready_now:
+			ultimate_label.text = "PRONTA  "
+			ultimate_label.add_theme_color_override("font_color", Color("#ffe08a"))
+		else:
+			ultimate_label.text = "ULT %d/%d" % [mini(ultimate_charge, ultimate_cost), ultimate_cost]
+			ultimate_label.add_theme_color_override("font_color", Color("#9dff72"))
+	if ready_now:
+		start_ultimate_ready_glow()
+	elif is_instance_valid(ultimate_glow_tween):
+		ultimate_glow_tween.kill()
+		ultimate_glow_tween = null
+		if is_instance_valid(ultimate_bar):
+			ultimate_bar.modulate = Color.WHITE
+
+func start_ultimate_ready_glow() -> void:
+	if not is_instance_valid(ultimate_bar):
+		return
+	if is_instance_valid(ultimate_glow_tween):
+		return
+	ultimate_glow_tween = create_tween().bind_node(ultimate_bar).set_loops()
+	ultimate_glow_tween.tween_property(ultimate_bar, "modulate", Color(1.35, 1.45, 0.85, 1.0), 0.28).set_trans(Tween.TRANS_SINE)
+	ultimate_glow_tween.tween_property(ultimate_bar, "modulate", Color(0.55, 1.15, 0.95, 1.0), 0.28).set_trans(Tween.TRANS_SINE)
+
+func try_ultimate() -> void:
+	if state != "playing" or not is_instance_valid(player) or ultimate_active:
+		return
+	if attack_time > 0.0 or dash_time > 0.0 or guarding:
+		return
+	if not player.is_on_floor():
+		flash_message("ULTIMATE SÓ NO CHÃO", Color("#ff9b7d"))
+		return
+	if ultimate_charge < ultimate_cost:
+		flash_message("ULTIMATE  %d / %d FRAGMENTOS" % [ultimate_charge, ultimate_cost], Color("#ffcf78"))
+		return
+	start_ultimate()
+
+func start_ultimate() -> void:
+	ultimate_active = true
+	ultimate_hit_done = false
+	ultimate_charge = 0
+	ultimate_cost = maxi(ULTIMATE_BASE_COST * 2, ultimate_cost * 2)
+	idle_fidgeting = false
+	idle_stand_time = 0.0
+	player.velocity = Vector2.ZERO
+	ultimate_lock_position = player.global_position
+	invincible_time = 4.6
+	player_sprite.visible = false
+	update_ultimate_hud()
+	play_ui_sound("portal_open.wav", -7.0, 0.92)
+	flash_message("EXPLOSÃO DE CONHECIMENTO", Color("#9dff72"))
+	if is_instance_valid(ultimate_visual):
+		ultimate_visual.queue_free()
+	ultimate_visual = Sprite2D.new()
+	ultimate_visual.name = "UltimatePose"
+	ultimate_visual.centered = true
+	ultimate_visual.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	ultimate_visual.z_index = player.z_index + 1
+	player.add_child(ultimate_visual)
+	set_ultimate_charge_frame(0)
+	var seq := create_tween().bind_node(player)
+	for frame_index in ULTIMATE_CHARGE_FRAMES:
+		seq.tween_callback(set_ultimate_charge_frame.bind(frame_index))
+		seq.tween_interval(0.20)
+	seq.tween_callback(set_ultimate_converge_frame.bind(0))
+	seq.tween_interval(0.26)
+	seq.tween_callback(set_ultimate_converge_frame.bind(1))
+	seq.tween_interval(0.24)
+	seq.tween_callback(fire_ultimate_beam)
+	seq.tween_interval(0.18)
+	seq.tween_callback(resolve_ultimate_beam)
+	seq.tween_interval(0.62)
+	seq.tween_callback(finish_ultimate)
+
+func set_ultimate_charge_frame(frame_index: int) -> void:
+	if not is_instance_valid(ultimate_visual):
+		return
+	ultimate_visual.texture = ULTIMATE_SHEET
+	ultimate_visual.region_enabled = true
+	ultimate_visual.region_rect = Rect2(frame_index * ULTIMATE_CHARGE_CELL.x, 0, ULTIMATE_CHARGE_CELL.x, ULTIMATE_CHARGE_CELL.y)
+	ultimate_visual.scale = Vector2(ULTIMATE_POSE_SCALE, ULTIMATE_POSE_SCALE)
+	ultimate_visual.position = ultimate_pose_offset(float(ULTIMATE_CHARGE_CELL.y))
+	ultimate_visual.flip_h = facing < 0.0
+
+func ultimate_pose_offset(cell_height: float, extra_x := 0.0) -> Vector2:
+	var hero_feet := PLAYER_SPRITE_FEET_OFFSET_Y + float(HERO_FRAME_SIZE) * 0.5 * HERO_SPRITE_SCALE
+	var pose_half := cell_height * 0.5 * ULTIMATE_POSE_SCALE
+	return Vector2(extra_x, hero_feet - pose_half + ULTIMATE_POSE_FEET_TUNE)
+
+func set_ultimate_converge_frame(frame_index: int) -> void:
+	if not is_instance_valid(ultimate_visual):
+		return
+	ultimate_visual.texture = ULTIMATE_CONVERGE
+	ultimate_visual.region_enabled = true
+	ultimate_visual.region_rect = Rect2(frame_index * ULTIMATE_CONVERGE_CELL.x, 0, ULTIMATE_CONVERGE_CELL.x, ULTIMATE_CONVERGE_CELL.y)
+	ultimate_visual.scale = Vector2(ULTIMATE_POSE_SCALE, ULTIMATE_POSE_SCALE)
+	ultimate_visual.position = ultimate_pose_offset(float(ULTIMATE_CONVERGE_CELL.y), facing * 8.0)
+	ultimate_visual.flip_h = facing < 0.0
+
+func fire_ultimate_beam() -> void:
+	if not is_instance_valid(player) or not is_instance_valid(world):
+		return
+	if is_instance_valid(ultimate_visual):
+		ultimate_visual.texture = ULTIMATE_CAST
+		ultimate_visual.region_enabled = false
+		ultimate_visual.scale = Vector2(ULTIMATE_POSE_SCALE, ULTIMATE_POSE_SCALE)
+		ultimate_visual.position = ultimate_pose_offset(300.0, facing * 8.0)
+		ultimate_visual.flip_h = facing < 0.0
+	if is_instance_valid(ultimate_beam_sprite):
+		ultimate_beam_sprite.queue_free()
+	ultimate_beam_sprite = Sprite2D.new()
+	ultimate_beam_sprite.texture = ULTIMATE_BEAM
+	ultimate_beam_sprite.centered = true
+	ultimate_beam_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	ultimate_beam_sprite.z_index = player.z_index + 2
+	ultimate_beam_sprite.scale = Vector2(0.18, ULTIMATE_BEAM_SCALE * 0.55)
+	ultimate_beam_sprite.modulate = Color(1.05, 1.12, 1.08, 0.95)
+	ultimate_beam_sprite.flip_h = facing < 0.0
+	world.add_child(ultimate_beam_sprite)
+	_place_ultimate_beam()
+	play_ui_sound("player_attack.wav", -6.0, 0.72)
+	var grow := create_tween().bind_node(ultimate_beam_sprite)
+	grow.tween_property(ultimate_beam_sprite, "scale", Vector2(ULTIMATE_BEAM_SCALE, ULTIMATE_BEAM_SCALE), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	shake_camera_once(4.0)
+
+func _place_ultimate_beam() -> void:
+	if not is_instance_valid(ultimate_beam_sprite) or not is_instance_valid(player):
+		return
+	var beam_w := float(ULTIMATE_BEAM.get_width()) * ULTIMATE_BEAM_SCALE
+	ultimate_beam_sprite.global_position = player.global_position + Vector2(facing * (beam_w * 0.52 + 36.0), 4.0)
+
+func ultimate_damage() -> int:
+	return maxi(1, player_attack_damage * ULTIMATE_DAMAGE_MULT)
+
+func resolve_ultimate_beam() -> void:
+	if not is_instance_valid(player) or ultimate_hit_done:
+		return
+	ultimate_hit_done = true
+	_place_ultimate_beam()
+	var origin := player.global_position
+	var hit_point := origin + Vector2(facing * ULTIMATE_BEAM_LENGTH, 0.0)
+	var hit_count := 0
+	var dmg := ultimate_damage()
+	for enemy in enemies:
+		var candidate: Variant = enemy.get("node")
+		if not is_instance_valid(candidate):
+			continue
+		var body: CharacterBody2D = candidate
+		if body.has_meta("defeated"):
+			continue
+		var relative: Vector2 = body.global_position - origin
+		var forward := relative.x * facing
+		var lateral := absf(relative.y)
+		var pad := 58.0 if is_boss_kind(String(enemy.kind)) else 36.0
+		if forward >= -20.0 and forward <= ULTIMATE_BEAM_LENGTH + 48.0 and lateral <= ULTIMATE_BEAM_HEIGHT + pad:
+			hit_count += 1
+			hit_point = body.global_position
+			apply_ultimate_hit(enemy, dmg)
+	if hit_count == 0:
+		spawn_ultimate_impact(hit_point, false)
+		play_ui_sound("boss_slam.wav", -12.0, 1.15)
+	else:
+		play_ui_sound("boss_slam.wav", -6.0, 0.82)
+		trigger_hitstop(0.09)
+	if is_instance_valid(ultimate_beam_sprite):
+		var fade := create_tween().bind_node(ultimate_beam_sprite)
+		fade.tween_property(ultimate_beam_sprite, "modulate:a", 0.0, 0.28)
+		fade.parallel().tween_property(ultimate_beam_sprite, "scale", Vector2(ULTIMATE_BEAM_SCALE * 1.12, ULTIMATE_BEAM_SCALE * 0.72), 0.28)
+		fade.tween_callback(ultimate_beam_sprite.queue_free)
+
+func apply_ultimate_hit(enemy: Dictionary, amount: int) -> void:
+	var candidate: Variant = enemy.get("node")
+	if not is_instance_valid(candidate):
+		return
+	var body: CharacterBody2D = candidate
+	var lift := -160.0 if String(enemy.kind) != "flying" else -70.0
+	damage_enemy(enemy, amount, Vector2(facing * 680.0, lift))
+	if not is_instance_valid(body):
+		return
+	enemy.hurt = 0.70
+	enemy.stun_time = 1.15 if is_boss_kind(String(enemy.kind)) else 0.90
+	enemy.state_time = float(enemy.stun_time)
+	enemy.attack_state = "stunned"
+	enemy.cooldown = 0.85
+	var pos := body.global_position + Vector2(0.0, -10.0)
+	spawn_ultimate_impact(pos, true)
+	spawn_ultimate_emblem(pos)
+	create_floating_text(pos + Vector2(0.0, -36.0), "x%d" % ULTIMATE_DAMAGE_MULT, Color("#9dff72"))
+	var sprite: Sprite2D = enemy.get("sprite") as Sprite2D
+	if is_instance_valid(sprite):
+		sprite.modulate = Color("#8dfff0")
+		var recuo := create_tween().bind_node(sprite)
+		var base_scale := sprite.scale
+		recuo.tween_property(sprite, "scale", base_scale * Vector2(0.82, 1.18), 0.07)
+		recuo.tween_property(sprite, "scale", base_scale, 0.16).set_trans(Tween.TRANS_BACK)
+		recuo.parallel().tween_property(sprite, "modulate", Color("#ff6a6a"), 0.16)
+
+func spawn_ultimate_emblem(pos: Vector2) -> void:
+	if not is_instance_valid(world):
+		return
+	var emblem := Sprite2D.new()
+	emblem.texture = ULTIMATE_CONVERGE
+	emblem.centered = true
+	emblem.region_enabled = true
+	emblem.region_rect = Rect2(0, 0, ULTIMATE_CONVERGE_CELL.x, ULTIMATE_CONVERGE_CELL.y)
+	emblem.global_position = pos + Vector2(0.0, -18.0)
+	emblem.z_index = 18
+	emblem.scale = Vector2(0.18, 0.18)
+	emblem.modulate = Color(1.15, 1.2, 1.05, 0.95)
+	emblem.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	world.add_child(emblem)
+	var pulse := create_tween().bind_node(emblem)
+	pulse.tween_property(emblem, "scale", Vector2(0.42, 0.42), 0.10).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	pulse.tween_callback(func():
+		if is_instance_valid(emblem):
+			emblem.region_rect = Rect2(ULTIMATE_CONVERGE_CELL.x, 0, ULTIMATE_CONVERGE_CELL.x, ULTIMATE_CONVERGE_CELL.y)
+	)
+	pulse.tween_property(emblem, "modulate:a", 0.0, 0.28)
+	pulse.parallel().tween_property(emblem, "scale", Vector2(0.58, 0.58), 0.28)
+	pulse.tween_callback(emblem.queue_free)
+
+func spawn_ultimate_impact(pos: Vector2, on_enemy := false) -> void:
+	if not is_instance_valid(world):
+		return
+	var impact := Sprite2D.new()
+	impact.texture = ULTIMATE_IMPACT
+	impact.centered = true
+	impact.region_enabled = true
+	impact.region_rect = Rect2(0, 0, ULTIMATE_IMPACT_CELL.x, ULTIMATE_IMPACT_CELL.y)
+	impact.global_position = pos + Vector2(0.0, 8.0)
+	impact.z_index = 16
+	var hit_scale := 1.22 if on_enemy else 1.0
+	impact.scale = Vector2(ULTIMATE_IMPACT_SCALE * 0.55 * hit_scale, ULTIMATE_IMPACT_SCALE * 0.55 * hit_scale)
+	impact.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	world.add_child(impact)
+	var smoke := Sprite2D.new()
+	smoke.texture = ULTIMATE_SMOKE
+	smoke.centered = true
+	smoke.region_enabled = true
+	smoke.region_rect = Rect2(0, 0, ULTIMATE_SMOKE_CELL.x, ULTIMATE_SMOKE_CELL.y)
+	smoke.global_position = pos + Vector2(0.0, 12.0)
+	smoke.z_index = 15
+	smoke.scale = Vector2(ULTIMATE_SMOKE_SCALE * hit_scale, ULTIMATE_SMOKE_SCALE * hit_scale)
+	smoke.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	world.add_child(smoke)
+	var boom := create_tween().bind_node(impact)
+	boom.tween_property(impact, "scale", Vector2(ULTIMATE_IMPACT_SCALE * hit_scale, ULTIMATE_IMPACT_SCALE * hit_scale), 0.08).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	boom.tween_callback(func(): impact.region_rect = Rect2(ULTIMATE_IMPACT_CELL.x, 0, ULTIMATE_IMPACT_CELL.x, ULTIMATE_IMPACT_CELL.y))
+	boom.tween_interval(0.10)
+	boom.tween_property(impact, "modulate:a", 0.0, 0.32)
+	boom.tween_callback(impact.queue_free)
+	var puff := create_tween().bind_node(smoke)
+	puff.tween_method(func(value: float): smoke.region_rect = Rect2(int(value) * ULTIMATE_SMOKE_CELL.x, 0, ULTIMATE_SMOKE_CELL.x, ULTIMATE_SMOKE_CELL.y), 0.0, 6.0, 0.48)
+	puff.tween_property(smoke, "modulate:a", 0.0, 0.22)
+	puff.tween_callback(smoke.queue_free)
+	var crack := Sprite2D.new()
+	crack.texture = IMPACT_CRACK
+	crack.centered = true
+	crack.global_position = pos + Vector2(0.0, 14.0)
+	crack.z_index = 12
+	crack.scale = Vector2(IMPACT_CRACK_SCALE * 0.85, IMPACT_CRACK_SCALE * 0.80)
+	crack.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	world.add_child(crack)
+	var debris := Sprite2D.new()
+	debris.texture = IMPACT_DEBRIS
+	debris.centered = true
+	debris.global_position = pos + Vector2(0.0, 2.0)
+	debris.z_index = 14
+	debris.scale = Vector2(IMPACT_DEBRIS_SCALE * 0.70, IMPACT_DEBRIS_SCALE * 0.70)
+	debris.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	world.add_child(debris)
+	var crack_fade := create_tween().bind_node(crack)
+	crack_fade.tween_interval(0.28)
+	crack_fade.tween_property(crack, "modulate:a", 0.0, 0.55)
+	crack_fade.tween_callback(crack.queue_free)
+	var debris_fade := create_tween().bind_node(debris)
+	debris_fade.tween_property(debris, "position:y", debris.position.y - 24.0, 0.28)
+	debris_fade.parallel().tween_property(debris, "modulate:a", 0.0, 0.28)
+	debris_fade.tween_callback(debris.queue_free)
+	shake_camera_once(8.0)
+
+func finish_ultimate() -> void:
+	if is_instance_valid(ultimate_visual):
+		ultimate_visual.queue_free()
+	ultimate_visual = null
+	if is_instance_valid(ultimate_beam_sprite):
+		ultimate_beam_sprite.queue_free()
+	ultimate_beam_sprite = null
+	if is_instance_valid(player_sprite):
+		player_sprite.visible = true
+	ultimate_active = false
+	ultimate_hit_done = false
+	update_ultimate_hud()
+
 func create_double_jump_fx() -> void:
 	var ring := Line2D.new()
 	var points := PackedVector2Array()
@@ -3170,6 +3581,8 @@ func create_double_jump_fx() -> void:
 	tween.tween_callback(ring.queue_free)
 
 func animate_player(delta: float, axis: float) -> void:
+	if ultimate_active:
+		return
 	land_pose_time = maxf(0.0, land_pose_time - delta)
 	var anim := "idle"
 	if attack_time > 0:
@@ -4252,6 +4665,8 @@ func create_dash_fx() -> void:
 		tween.tween_callback(ghost.queue_free)
 
 func take_damage(amount: float, fell := false, attacker: Dictionary = {}) -> void:
+	if ultimate_active and not fell:
+		return
 	if invincible_time > 0:
 		if fell:
 			player.position = checkpoint
@@ -4595,10 +5010,10 @@ func show_end(victory: bool) -> void:
 	stats.add_theme_color_override("font_color",Color("#ffe28a"))
 	box.add_child(stats)
 	var again := make_button("JOGAR NOVAMENTE")
-	again.pressed.connect(start_game)
+	again.pressed.connect(func(): call_deferred("start_game"))
 	box.add_child(again)
 	var menu := make_button("VOLTAR AO MENU")
-	menu.pressed.connect(show_menu)
+	menu.pressed.connect(func(): call_deferred("show_menu"))
 	box.add_child(menu)
 
 func show_final_credits() -> void:
@@ -4610,8 +5025,8 @@ func show_final_credits() -> void:
 	var viewport := Control.new(); viewport.position=Vector2(176,146); viewport.size=Vector2(800,390); viewport.clip_contents=true; layer.add_child(viewport)
 	var roll := Label.new(); roll.name="CreditsRoll"; roll.position=Vector2(30,390); roll.size=Vector2(740,980); roll.text=credits_text(); roll.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER; roll.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; roll.add_theme_font_size_override("font_size",15); roll.add_theme_color_override("font_color",Color("#e5efe8")); viewport.add_child(roll)
 	var scroll := create_tween().bind_node(roll); scroll.tween_property(roll,"position:y",-roll.size.y,34.0)
-	var again := make_button("NOVA EXPERIÊNCIA",270); again.position=Vector2(292,570); again.custom_minimum_size.y=46; again.pressed.connect(show_difficulty_from_end); layer.add_child(again)
-	var menu := make_button("MENU",190); menu.position=Vector2(590,570); menu.custom_minimum_size.y=46; menu.pressed.connect(show_menu); layer.add_child(menu)
+	var again := make_button("NOVA EXPERIÊNCIA",270); again.position=Vector2(292,570); again.custom_minimum_size.y=46; again.pressed.connect(func(): call_deferred("show_difficulty_from_end")); layer.add_child(again)
+	var menu := make_button("MENU",190); menu.position=Vector2(590,570); menu.custom_minimum_size.y=46; menu.pressed.connect(func(): call_deferred("show_menu")); layer.add_child(menu)
 
 func show_difficulty_from_end() -> void:
 	show_menu()
@@ -4658,7 +5073,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		var key_name := OS.get_keycode_string(event.physical_keycode)
-		for other_action in ["move_left","move_right","jump","attack","guard","dash","pause"]:
+		for other_action in ["move_left","move_right","jump","attack","guard","dash","ultimate","pause"]:
 			if other_action==remap_action: continue
 			for old_event in InputMap.action_get_events(other_action):
 				if old_event is InputEventKey and old_event.physical_keycode==event.physical_keycode:
@@ -4704,17 +5119,17 @@ func show_pause() -> void:
 	box.add_child(resume)
 	var restart := make_button("REINICIAR FASE")
 	restart.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	restart.pressed.connect(restart_level)
+	restart.pressed.connect(func(): call_deferred("restart_level"))
 	box.add_child(restart)
 	var controls := Label.new()
-	controls.text = "%s atacar  •  %s escudo/parry  •  %s impulso  •  %s saltar" % [action_prompt("attack"),action_prompt("guard"),action_prompt("dash"),action_prompt("jump")]
+	controls.text = "%s atacar  •  %s escudo  •  %s impulso  •  %s ultimate  •  %s saltar" % [action_prompt("attack"),action_prompt("guard"),action_prompt("dash"),action_prompt("ultimate"),action_prompt("jump")]
 	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	controls.add_theme_font_size_override("font_size",13)
 	controls.add_theme_color_override("font_color",Color("#9be8cf"))
 	box.add_child(controls)
 	var quit := make_button("VOLTAR AO MENU")
 	quit.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	quit.pressed.connect(func(): get_tree().paused=false; show_menu())
+	quit.pressed.connect(func(): get_tree().paused=false; call_deferred("show_menu"))
 	box.add_child(quit)
 	resume.call_deferred("grab_focus")
 

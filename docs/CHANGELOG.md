@@ -1,5 +1,16 @@
 # Histórico de versões
 
+## Ajuste 2026-09-02 — capa e README do TCC
+
+- `capa_projeto.png` passou a ser a capa do repositório (README).
+- README reorganizado com a jornada implementada sob orientação de Jackson A. Z. Savoldi.
+
+## Ajuste 2026-09-02 — Ultimate de conhecimento
+
+- Skill ultimate (tecla U): só no chão, depois de 10 moedas. A barra brilha quando está pronta.
+- Depois de usar, o próximo custo dobra (20, 40…). Os fragmentos do portal não são gastos.
+- Folha `assets/utimete/utimete.png` recortada em carga, CEP/brasão, feixe, impacto e fumaça.
+
 ## Ajuste 2026-09-02 — pés, escala, rachadura e prólogo
 
 - Personagem um pouco menor (`HERO_SPRITE_SCALE` 0.40 → 0.36). Pés do chão grosso recalibrados; plataformas finas descem só a colisão (`ELEVATED_PLATFORM_TOP_INSET`).
