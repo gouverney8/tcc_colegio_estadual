@@ -1,0 +1,19 @@
+# Godot
+.godot/
+*.uid.bak
+
+# Builds e pacotes
+build/
+*.exe
+*.pck
+*.zip
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporários
+*.tmp
+*.log
+qa/_captures/
