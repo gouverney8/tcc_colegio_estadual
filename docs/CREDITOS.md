@@ -10,8 +10,10 @@ As licenças originais dos pacotes foram preservadas em `Jorginho_Jornada_Sem_Re
 
 | Função | Nome |
 | --- | --- |
-| Ideia, direção, programação e TCC | Gustavo Bento Ouverney |
+| Aluno — ideia, direção, programação e TCC | Gustavo Bento Ouverney |
+| Professor responsável; orientação de estrutura do GitHub e de arquitetura do jogo | Jackson A. Z. Savoldi |
 | Orientação acadêmica | Carlos Alcantara |
+| Curso | Jogos Digitais — Colégio Estadual de Paranavaí (E.F.M.N.P.) |
 | Estruturação do projeto e migração do protótipo HTML para GDScript/Godot | assistência de OpenAI Codex |
 | Engine | Godot Engine 4.7 |
 
