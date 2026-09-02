@@ -32,6 +32,7 @@ O ciclo central é **explorar → lutar → coletar fragmentos → alimentar o p
 - J: atacar
 - Shift: dash
 - Esc: pausar
+- K+J: atalho de desenvolvedor para a próxima fase
 
 Todos podem ser remapeados em Configurações e são salvos em `user://settings.cfg`.
 

@@ -152,6 +152,7 @@ Os comandos podem ser remapeados no menu de configurações.
 | Guardar / aparar | Clique direito ou `K` | **LB** |
 | Impulso | `Shift` | **B** |
 | Pausar | `Esc` | **Start** |
+| Avançar fase (modo desenvolvedor) | `K` + `J` ao mesmo tempo | — |
 
 ### Dificuldades
 

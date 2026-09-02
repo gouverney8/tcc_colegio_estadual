@@ -84,6 +84,7 @@ const DIFFICULTIES := [
 
 var state := "menu"
 var level := 0
+var dev_skip_held := false
 var current_level_scene: Node2D
 var current_level_data: Dictionary = {}
 var coins := 0
@@ -2553,7 +2554,14 @@ func flash_message(text: String, color: Color) -> void:
 	tween.tween_property(message_label,"modulate:a",0.0,0.5)
 
 func _physics_process(delta: float) -> void:
+	var skip_combo := Input.is_physical_key_pressed(KEY_J) and Input.is_physical_key_pressed(KEY_K)
+	if not skip_combo:
+		dev_skip_held = false
 	if state != "playing" or not is_instance_valid(player): return
+	if skip_combo and not dev_skip_held:
+		dev_skip_held = true
+		skip_level_developer()
+		return
 	run_time += delta
 	attack_time = maxf(0.0,attack_time-delta)
 	if attack_time > 0.0:
@@ -3980,6 +3988,16 @@ func get_boss() -> Dictionary:
 		var candidate: Variant = enemy.get("node")
 		if is_boss_kind(enemy.kind) and is_instance_valid(candidate) and not candidate.has_meta("defeated"): return enemy
 	return {}
+
+func skip_level_developer() -> void:
+	if state!="playing": return
+	var next_index := level+1
+	if next_index>=levels.size():
+		flash_message("MODO DEV  •  JORNADA ENCERRADA",Color("#ffe28a"))
+		show_end(true)
+		return
+	flash_message("MODO DEV  •  FASE %d → %d" % [level+1,next_index+1],Color("#ffe28a"))
+	transition_to_next_level()
 
 func try_finish_level() -> void:
 	if state!="playing": return

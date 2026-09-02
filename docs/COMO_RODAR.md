@@ -87,6 +87,7 @@ O jogo começa na abertura (autoria e engine), depois no menu. Dali você escolh
 - **Clique direito** ou **K**: guardar; no momento certo, aparar (parry)
 - **Shift**: impulso
 - **Esc**: pausar
+- **K + J** (ao mesmo tempo): modo desenvolvedor — pula para a próxima fase, sem coletar fragmentos nem derrotar o chefe. Solte as teclas antes de pular de novo.
 
 Controle (gamepad) também funciona. Os comandos podem ser trocados em **Configurações**.
 
