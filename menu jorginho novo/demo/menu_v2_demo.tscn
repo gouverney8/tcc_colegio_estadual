@@ -1,0 +1,115 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://demo/menu_v2_demo.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_v2/background/menu_workshop_1152x648.png" id="2_background"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_v2/panels/panel_main_9slice.png" id="3_panel"]
+[ext_resource type="Theme" path="res://theme/menu_v2_theme.tres" id="4_theme"]
+
+[node name="MenuV2Demo" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 64.0
+offset_right = 570.0
+offset_bottom = 132.0
+theme = ExtResource("4_theme")
+theme_override_font_sizes/font_size = 54
+text = "JORGINHO"
+
+[node name="Subtitle" type="Label" parent="."]
+layout_mode = 0
+offset_left = 62.0
+offset_top = 130.0
+offset_right = 570.0
+offset_bottom = 166.0
+theme = ExtResource("4_theme")
+theme_override_font_sizes/font_size = 19
+text = "JORNADA SEM RETORNO"
+
+[node name="MenuPanel" type="NinePatchRect" parent="."]
+layout_mode = 0
+offset_left = 690.0
+offset_top = 48.0
+offset_right = 1120.0
+offset_bottom = 603.0
+texture = ExtResource("3_panel")
+patch_margin_left = 54
+patch_margin_top = 54
+patch_margin_right = 54
+patch_margin_bottom = 54
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="MenuPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 30.0
+offset_right = -48.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4_theme")
+theme_override_constants/separation = 6
+
+[node name="MenuTitle" type="Label" parent="MenuPanel/Content"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 23
+text = "MENU PRINCIPAL"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NewGameButton" type="Button" parent="MenuPanel/Content"]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+text = "NOVA JORNADA"
+
+[node name="ContinueButton" type="Button" parent="MenuPanel/Content"]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+text = "CONTINUAR"
+
+[node name="SettingsButton" type="Button" parent="MenuPanel/Content"]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+text = "CONFIGURAÇÕES"
+
+[node name="CreditsButton" type="Button" parent="MenuPanel/Content"]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+text = "CRÉDITOS"
+
+[node name="ExitButton" type="Button" parent="MenuPanel/Content"]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+text = "SAIR"
+
+[connection signal="pressed" from="MenuPanel/Content/NewGameButton" to="." method="_on_new_game_pressed"]
+[connection signal="pressed" from="MenuPanel/Content/ContinueButton" to="." method="_on_continue_pressed"]
+[connection signal="pressed" from="MenuPanel/Content/SettingsButton" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="MenuPanel/Content/CreditsButton" to="." method="_on_credits_pressed"]
+[connection signal="pressed" from="MenuPanel/Content/ExitButton" to="." method="_on_exit_pressed"]
+
