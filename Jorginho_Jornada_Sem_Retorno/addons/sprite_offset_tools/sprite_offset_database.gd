@@ -1,0 +1,136 @@
+@tool
+class_name SpriteOffsetDatabase
+extends Object
+
+const DATABASE_PATH = "res://sprite_offset_database.dat"
+
+static var _db_initialized: bool = false
+static var _db: Dictionary[String, Vector2] = {} # [UID, Offset]
+
+
+## Loads the database into cache.
+static func _load_database() -> void:
+	var f: FileAccess = FileAccess.open(DATABASE_PATH, FileAccess.READ)
+	if f:
+		_db = str_to_var(f.get_as_text())
+		_db_initialized = true
+	else:
+		save_database()
+
+
+## Save the cached sprite offset database to SpriteOffsetDatabase.DATABASE_PATH.
+static func save_database() -> void:
+	if _db.is_empty():
+		return
+	var f: FileAccess = FileAccess.open(DATABASE_PATH, FileAccess.WRITE)
+	f.store_string(var_to_str(_db))
+
+
+## Check whether a texture has an offset saved to the sprite offset database.
+static func has_offset_for_texture(texture: Texture2D) -> bool:
+	return has_offset_for_texture_uid(ResourceUID.path_to_uid(texture.resource_path))
+
+
+## Check whether a texture has an offset saved to the sprite offset database.
+static func has_offset_for_texture_uid(texture_uid: String) -> bool:
+	if not _db_initialized:
+		_load_database()
+	return _db.has(texture_uid)
+
+
+## Get the offset for a texture. For Reasons™, the offset in the database are relative
+## to the top-left corner and inverted. Example usage where 'target_offset' is
+## the offset returned by this function: sprite.offset = -target_offset
+## if not centered else sprite.texture.get_size() * 0.5 - target_offset
+static func get_offset_for_texture(texture: Texture2D) -> Vector2:
+	return get_offset_for_texture_uid(ResourceUID.path_to_uid(texture.resource_path))
+
+
+## Get the offset for a texture. For Reasons™, the offset in the database are relative
+## to the top-left corner and inverted. Example usage where 'target_offset' is
+## the offset returned by this function: sprite.offset = -target_offset
+## if not centered else sprite.texture.get_size() * 0.5 - target_offset
+static func get_offset_for_texture_uid(texture_uid: String) -> Vector2:
+	if not _db_initialized:
+		_load_database()
+	return _db.get(texture_uid, Vector2.ZERO)
+
+
+## Set the offset for a texture. For Reasons™, the offset in the database should be
+## relative to the left top corner and inverted. Example: 
+## SpriteOffsetDatabase.set_offset_for_texture(sprite.texture, -sprite.offset if not
+## sprite.centered else sprite.texture.get_size() * 0.5 - sprite.offset)
+static func set_offset_for_texture(texture: Texture2D, offset: Vector2) -> void:
+	set_offset_for_texture_uid(ResourceUID.path_to_uid(texture.resource_path), offset)
+
+
+## Set the offset for a texture. For Reasons™, the offset in the database should be
+## relative to the left top corner and inverted. Example: 
+## SpriteOffsetDatabase.set_offset_for_texture_uid(texture_uid, -sprite.offset if not
+## sprite.centered else sprite.texture.get_size() * 0.5 - sprite.offset)
+static func set_offset_for_texture_uid(texture_uid: String, offset: Vector2) -> void:
+	if not _db_initialized:
+		_load_database()
+	_db[texture_uid] = offset.snappedf(0.01) 
+
+
+## Update a Sprite2D's offset to the offset found in the database. If `preserve_position`
+## is `true`, the Sprite2D's position and the positions of its child nodes will be updated 
+## to counteract the (visual) repositioning of the sprite.
+static func update_offset(sprite: Sprite2D, preserve_position: bool) -> void:
+	if not _db_initialized:
+		_load_database()
+	
+	var texture_uid = ResourceUID.path_to_uid(sprite.texture.resource_path)
+	var target_offset: Vector2 = Vector2.ZERO
+	
+	if has_offset_for_texture_uid(texture_uid):
+		target_offset = get_offset_for_texture_uid(texture_uid)
+	
+	if sprite.centered:
+		var center: Vector2 = sprite.texture.get_size() * 0.5
+		target_offset = center - target_offset
+	else:
+		target_offset = -target_offset
+	
+	if target_offset.is_equal_approx(sprite.offset):
+		return
+	
+	if not preserve_position:
+		sprite.offset = target_offset
+		return
+	
+	var delta_position: Vector2 = target_offset - sprite.offset
+	sprite.offset = target_offset
+	sprite.position -= delta_position
+	
+	if sprite.get_child_count() == 0:
+		return
+	
+	for c: Node in sprite.get_children():
+		if c is not Node2D:
+			continue
+		var n: Node2D = c as Node2D
+		n.position += delta_position
+
+
+## Clean up the database by removing items in the dictionary that refer to UIDs that
+## are no longer in the project
+static func cleanup() -> void:
+	if not _db_initialized:
+		_load_database()
+	
+	var keys_to_remove: Array[String] = []
+	for s: String in _db.keys():
+		var p: String = ResourceUID.uid_to_path(s)
+		if not ResourceLoader.exists(p):
+			keys_to_remove.append(s)
+	
+	if not keys_to_remove.is_empty():
+		for s: String in keys_to_remove:
+			_db.erase(s)
+		Engine.get_singleton(&"EditorInterface").get_editor_toaster().push_toast("Removed " + str(keys_to_remove.size()) + " offsets from the database, most likely due to those assets no longer being in the project.")
+	else:
+		Engine.get_singleton(&"EditorInterface").get_editor_toaster().push_toast("No Sprite Offset items had to be cleaned up. You're good!")
+	
+	save_database()

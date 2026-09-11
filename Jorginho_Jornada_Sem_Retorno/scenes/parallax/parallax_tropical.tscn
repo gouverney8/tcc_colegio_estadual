@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://dk07k3out6vlt"]
+
+[ext_resource type="Texture2D" uid="uid://dinbq6qwt3ppc" path="res://assets/parallax/tropical/static/full_background.png" id="1_30kjq"]
+[ext_resource type="Texture2D" uid="uid://lafqj0xjurjp" path="res://assets/parallax/tropical/static/cloud_1.png" id="2_k833s"]
+[ext_resource type="Texture2D" uid="uid://48wb78b5dxpe" path="res://assets/parallax/tropical/static/cloud_3.png" id="3_n8ehv"]
+[ext_resource type="Texture2D" uid="uid://kvocq66vtdd0" path="res://assets/parallax/tropical/static/cloud_2.png" id="4_mcyab"]
+[ext_resource type="SpriteFrames" uid="uid://by4182eq5iuwo" path="res://assets/parallax/tropical/animated/birds_frames.tres" id="5_7pnm8"]
+[ext_resource type="Script" uid="uid://bqnnq3lt1oupt" path="res://scripts/systems/parallax_motion.gd" id="6_5ak32"]
+[ext_resource type="SpriteFrames" uid="uid://cxhi82hgsss13" path="res://assets/parallax/tropical/animated/leaves_frames.tres" id="7_twqjg"]
+
+[node name="Parallax_Tropical_Editavel" type="Node2D" unique_id=123919854]
+
+[node name="01_Fundo_Completo_Fornecido" type="Parallax2D" parent="." unique_id=1334402430]
+z_index = -19
+scroll_scale = Vector2(0.02, 0.01)
+repeat_size = Vector2(1276, 0)
+repeat_times = 4
+
+[node name="Vale_Das_Aguas" type="Sprite2D" parent="01_Fundo_Completo_Fornecido" unique_id=702056203]
+texture_filter = 1
+position = Vector2(638, 359)
+scale = Vector2(0.76, 0.76)
+texture = ExtResource("1_30kjq")
+
+[node name="02_Nuvens_Suaves" type="Parallax2D" parent="." unique_id=2137211358]
+z_index = -17
+scroll_scale = Vector2(0.05, 0.02)
+repeat_size = Vector2(1536, 0)
+repeat_times = 4
+
+[node name="Nuvem_170" type="Sprite2D" parent="02_Nuvens_Suaves" unique_id=2143148889]
+modulate = Color(1, 1, 1, 0.46)
+texture_filter = 1
+position = Vector2(170, 100)
+scale = Vector2(0.62, 0.62)
+texture = ExtResource("2_k833s")
+
+[node name="Nuvem_590" type="Sprite2D" parent="02_Nuvens_Suaves" unique_id=103349369]
+modulate = Color(1, 1, 1, 0.46)
+texture_filter = 1
+position = Vector2(590, 145)
+scale = Vector2(0.56, 0.56)
+texture = ExtResource("3_n8ehv")
+
+[node name="Nuvem_1030" type="Sprite2D" parent="02_Nuvens_Suaves" unique_id=1349495939]
+modulate = Color(1, 1, 1, 0.46)
+texture_filter = 1
+position = Vector2(1030, 105)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("4_mcyab")
+
+[node name="03_Passaros_Animados" type="Parallax2D" parent="." unique_id=1373576286]
+z_index = -12
+scroll_scale = Vector2(0.18, 0.07)
+repeat_size = Vector2(1536, 0)
+repeat_times = 4
+
+[node name="Passaros" type="AnimatedSprite2D" parent="03_Passaros_Animados" unique_id=816733091]
+texture_filter = 1
+position = Vector2(164.00002, 187)
+scale = Vector2(0.7954946, 0.917907)
+sprite_frames = ExtResource("5_7pnm8")
+autoplay = "default"
+frame_progress = 0.20482188
+script = ExtResource("6_5ak32")
+velocity = Vector2(16, 0)
+wrap_horizontal = true
+wrap_left = -140.0
+wrap_right = 1680.0
+bob_amount = 4.0
+
+[node name="04_Vida_Ambiental_Discreta" type="Parallax2D" parent="." unique_id=1994410466]
+z_index = -5
+scroll_scale = Vector2(0.55, 0.12)
+repeat_size = Vector2(1536, 0)
+repeat_times = 4
+
+[node name="Folhas_Animadas" type="AnimatedSprite2D" parent="04_Vida_Ambiental_Discreta" unique_id=1050034962]
+texture_filter = 1
+position = Vector2(968.00006, 338)
+scale = Vector2(0.5865214, 0.4507547)
+sprite_frames = ExtResource("7_twqjg")
+autoplay = "default"
+script = ExtResource("6_5ak32")
+velocity = Vector2(-6, 4)
+wrap_horizontal = true
+wrap_left = -100.0
+wrap_right = 1650.0
+wrap_vertical = true
+wrap_top = 220.0
+wrap_bottom = 500.0
+bob_amount = 5.0

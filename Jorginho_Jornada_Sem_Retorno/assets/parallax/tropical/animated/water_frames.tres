@@ -1,0 +1,53 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/parallax/tropical/animated/water_strip.png" id="1_ncaj0"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cq2ne"]
+atlas = ExtResource("1_ncaj0")
+region = Rect2(0, 0, 140, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yec1r"]
+atlas = ExtResource("1_ncaj0")
+region = Rect2(140, 0, 140, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tcpen"]
+atlas = ExtResource("1_ncaj0")
+region = Rect2(280, 0, 140, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_brhss"]
+atlas = ExtResource("1_ncaj0")
+region = Rect2(420, 0, 140, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0g2wj"]
+atlas = ExtResource("1_ncaj0")
+region = Rect2(560, 0, 140, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x4wq5"]
+atlas = ExtResource("1_ncaj0")
+region = Rect2(700, 0, 140, 72)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cq2ne")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yec1r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tcpen")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_brhss")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0g2wj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x4wq5")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 7.0
+}]

@@ -1,0 +1,55 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/componentes/botoes_madeira/estados/normal.png" id="1_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/componentes/botoes_madeira/estados/pressionado.png" id="2_pressed"]
+[ext_resource type="Texture2D" path="res://assets/ui/componentes/botoes_madeira/estados/hover.png" id="3_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/componentes/botoes_madeira/estados/desabilitado.png" id="4_disabled"]
+[ext_resource type="FontFile" path="res://assets/fonte/Germania_One/GermaniaOne-Regular.ttf" id="5_font"]
+[ext_resource type="Script" path="res://scripts/ui/editable_texture_button.gd" id="6_script"]
+
+[sub_resource type="AtlasTexture" id="Normal"]
+atlas = ExtResource("1_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="Pressed"]
+atlas = ExtResource("1_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="Hover"]
+atlas = ExtResource("1_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="Disabled"]
+atlas = ExtResource("1_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[node name="LabeledActionButton" type="TextureButton"]
+custom_minimum_size = Vector2(280, 68)
+mouse_default_cursor_shape = 2
+texture_normal = SubResource("Normal")
+texture_pressed = SubResource("Pressed")
+texture_hover = SubResource("Hover")
+texture_disabled = SubResource("Disabled")
+ignore_texture_size = true
+stretch_mode = 5
+script = ExtResource("6_script")
+caption = "AÇÃO"
+caption_size = 23
+caption_horizontal_padding = 32
+
+[node name="Caption" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("5_font")
+text = "AÇÃO"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,0 +1,32 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/parallax/industrial/animated/embers_strip.png" id="1_cefy8"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o6fth"]
+atlas = ExtResource("1_cefy8")
+region = Rect2(0, 0, 95, 126)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5c57v"]
+atlas = ExtResource("1_cefy8")
+region = Rect2(95, 0, 95, 126)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dsg4a"]
+atlas = ExtResource("1_cefy8")
+region = Rect2(190, 0, 95, 126)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o6fth")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5c57v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dsg4a")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 8.0
+}]

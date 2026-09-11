@@ -1,0 +1,191 @@
+[gd_scene format=3 uid="uid://bmfp7f146xir7"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/components/ornamental_panel_v3.tscn" id="1_title"]
+[ext_resource type="Texture2D" path="res://assets/ui/componentes/botoes_madeira/estados/normal.png" id="2_button_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/componentes/botoes_madeira/estados/pressionado.png" id="3_button_pressed"]
+[ext_resource type="Texture2D" path="res://assets/ui/componentes/botoes_madeira/estados/hover.png" id="4_button_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/componentes/botoes_madeira/estados/desabilitado.png" id="5_button_disabled"]
+[ext_resource type="Texture2D" path="res://assets/ui/componentes/botoes_madeira/estados/focado.png" id="6_button_focused"]
+[ext_resource type="FontFile" path="res://assets/fonte/Germania_One/GermaniaOne-Regular.ttf" id="7_font"]
+[ext_resource type="Script" path="res://scripts/ui/editable_texture_button.gd" id="8_button_script"]
+
+[sub_resource type="Theme" id="Theme_Settings"]
+default_font = ExtResource("7_font")
+default_font_size = 17
+
+[sub_resource type="AtlasTexture" id="ButtonNormal"]
+atlas = ExtResource("2_button_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="ButtonPressed"]
+atlas = ExtResource("2_button_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="ButtonHover"]
+atlas = ExtResource("2_button_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="ButtonDisabled"]
+atlas = ExtResource("2_button_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="ButtonFocused"]
+atlas = ExtResource("2_button_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[node name="SettingsFrame" type="Control" unique_id=441809924]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_Settings")
+
+[node name="Shade" type="ColorRect" parent="." unique_id=476293809]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.004, 0.014, 0.01, 0.86)
+
+[node name="Title" type="Label" parent="." unique_id=371579876]
+z_index = 5
+layout_mode = 0
+offset_left = 220.0
+offset_top = 105.0
+offset_right = 932.0
+offset_bottom = 147.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.941, 0.651, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 34
+text = "CONFIGURAÇÕES"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Panel" parent="." unique_id=506917611 instance=ExtResource("1_title")]
+
+[node name="ContentSlot" type="VBoxContainer" parent="." unique_id=1796703875]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 190.0
+offset_top = 145.0
+offset_right = 962.0
+offset_bottom = 516.0
+theme_override_constants/separation = 7
+
+[node name="SettingsStatus" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 190.0
+offset_top = 500.0
+offset_right = 962.0
+offset_bottom = 528.0
+theme_override_colors/font_color = Color(1, 0.898, 0.604, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+text = "Configurações prontas para ajustar."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ActionBar" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 190.0
+offset_top = 530.0
+offset_right = 962.0
+offset_bottom = 606.0
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="ApplyButton" type="TextureButton" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 60)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+texture_normal = SubResource("ButtonNormal")
+texture_pressed = SubResource("ButtonPressed")
+texture_hover = SubResource("ButtonHover")
+texture_disabled = SubResource("ButtonDisabled")
+ignore_texture_size = true
+stretch_mode = 5
+script = ExtResource("8_button_script")
+caption = "APLICAR"
+caption_size = 20
+
+[node name="Caption" type="Label" parent="ActionBar/ApplyButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "APLICAR"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RestoreButton" type="TextureButton" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 60)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+texture_normal = SubResource("ButtonNormal")
+texture_pressed = SubResource("ButtonPressed")
+texture_hover = SubResource("ButtonHover")
+texture_disabled = SubResource("ButtonDisabled")
+ignore_texture_size = true
+stretch_mode = 5
+script = ExtResource("8_button_script")
+caption = "RESTAURAR"
+caption_size = 19
+
+[node name="Caption" type="Label" parent="ActionBar/RestoreButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "RESTAURAR"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackButton" type="TextureButton" parent="ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 60)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+texture_normal = SubResource("ButtonNormal")
+texture_pressed = SubResource("ButtonPressed")
+texture_hover = SubResource("ButtonHover")
+texture_disabled = SubResource("ButtonDisabled")
+ignore_texture_size = true
+stretch_mode = 5
+script = ExtResource("8_button_script")
+caption = "VOLTAR"
+caption_size = 20
+
+[node name="Caption" type="Label" parent="ActionBar/BackButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "VOLTAR"
+horizontal_alignment = 1
+vertical_alignment = 1

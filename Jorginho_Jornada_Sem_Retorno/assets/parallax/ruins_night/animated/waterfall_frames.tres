@@ -1,0 +1,60 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/parallax/ruins_night/animated/waterfall_strip.png" id="1_yj2ln"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mmonf"]
+atlas = ExtResource("1_yj2ln")
+region = Rect2(0, 0, 127, 182)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cx0ol"]
+atlas = ExtResource("1_yj2ln")
+region = Rect2(127, 0, 127, 182)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gjhpe"]
+atlas = ExtResource("1_yj2ln")
+region = Rect2(254, 0, 127, 182)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ympoo"]
+atlas = ExtResource("1_yj2ln")
+region = Rect2(381, 0, 127, 182)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7kfue"]
+atlas = ExtResource("1_yj2ln")
+region = Rect2(508, 0, 127, 182)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ta5p8"]
+atlas = ExtResource("1_yj2ln")
+region = Rect2(635, 0, 127, 182)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_63x4p"]
+atlas = ExtResource("1_yj2ln")
+region = Rect2(762, 0, 127, 182)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mmonf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cx0ol")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gjhpe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ympoo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7kfue")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ta5p8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_63x4p")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 8.0
+}]

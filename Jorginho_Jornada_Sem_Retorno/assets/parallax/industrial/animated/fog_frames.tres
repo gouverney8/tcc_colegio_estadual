@@ -1,0 +1,46 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://fxcfkej8c1gx"]
+
+[ext_resource type="Texture2D" uid="uid://cno07xddp2m32" path="res://assets/parallax/industrial/animated/fog_strip.png" id="1_72gm8"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_25mrf"]
+atlas = ExtResource("1_72gm8")
+region = Rect2(0, 0, 387, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hsotu"]
+atlas = ExtResource("1_72gm8")
+region = Rect2(387, 0, 387, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c7jfa"]
+atlas = ExtResource("1_72gm8")
+region = Rect2(774, 0, 387, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jrvgl"]
+atlas = ExtResource("1_72gm8")
+region = Rect2(1161, 0, 387, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6n24r"]
+atlas = ExtResource("1_72gm8")
+region = Rect2(1548, 0, 387, 69)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_25mrf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hsotu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c7jfa")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jrvgl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6n24r")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 1.0
+}]

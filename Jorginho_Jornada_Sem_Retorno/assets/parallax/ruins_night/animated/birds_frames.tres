@@ -1,0 +1,53 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://vf2u6gqe0443"]
+
+[ext_resource type="Texture2D" uid="uid://runn0gb5fo0u" path="res://assets/parallax/ruins_night/animated/birds_strip.png" id="1_8ad2e"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ye4hn"]
+atlas = ExtResource("1_8ad2e")
+region = Rect2(0, 0, 37, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rtcst"]
+atlas = ExtResource("1_8ad2e")
+region = Rect2(37, 0, 37, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2shs8"]
+atlas = ExtResource("1_8ad2e")
+region = Rect2(74, 0, 37, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bd4o6"]
+atlas = ExtResource("1_8ad2e")
+region = Rect2(111, 0, 37, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_05ydv"]
+atlas = ExtResource("1_8ad2e")
+region = Rect2(148, 0, 37, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vbhii"]
+atlas = ExtResource("1_8ad2e")
+region = Rect2(185, 0, 37, 29)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ye4hn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rtcst")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2shs8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bd4o6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_05ydv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vbhii")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 9.0
+}]

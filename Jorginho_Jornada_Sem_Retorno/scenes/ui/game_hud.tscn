@@ -1,0 +1,461 @@
+[gd_scene format=3 uid="uid://bcmckv4ol4l4w"]
+
+[ext_resource type="Texture2D" uid="uid://buob8wo6akrho" path="res://assets/ui/hud_v2/01_barra_vida/barra_vida_base.png" id="1_health"]
+[ext_resource type="Texture2D" uid="uid://kue1av1q8m16" path="res://assets/ui/hud_v2/04_placas/placa_fragmentos_sem_numero.png" id="2_fragments"]
+[ext_resource type="Texture2D" uid="uid://bdo6xjy6etrf6" path="res://assets/ui/hud_v2/10_paineis/painel_popup.png" id="3_panel"]
+[ext_resource type="Texture2D" uid="uid://cjvx4r1nnhkli" path="res://assets/ui/hud_v2/06_botoes/botao_pause.png" id="4_pause"]
+[ext_resource type="FontFile" path="res://assets/fonte/Germania_One/GermaniaOne-Regular.ttf" id="5_font"]
+
+[sub_resource type="Theme" id="Theme_HUD"]
+default_font = ExtResource("5_font")
+default_font_size = 14
+
+[sub_resource type="StyleBoxFlat" id="BarBackground"]
+bg_color = Color(0.025, 0.035, 0.027, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.52, 0.42, 0.24, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="DashFill"]
+bg_color = Color(0.247, 0.78, 0.73, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="GuardFill"]
+bg_color = Color(0.475, 0.75, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="UltimateFill"]
+bg_color = Color(0.38, 0.875, 0.77, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="BossFill"]
+bg_color = Color(0.88, 0.25, 0.22, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="PostureFill"]
+bg_color = Color(0.95, 0.72, 0.25, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="GameHUD" type="CanvasLayer" unique_id=191174078]
+layer = 10
+
+[node name="HUDRoot" type="Control" parent="." unique_id=643994182]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = SubResource("Theme_HUD")
+
+[node name="StatusFrame" type="TextureRect" parent="HUDRoot" unique_id=1689263115]
+layout_mode = 0
+offset_left = -17.0
+offset_top = -25.0
+offset_right = 427.0
+offset_bottom = 172.0
+mouse_filter = 2
+texture = ExtResource("1_health")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HealthLabel" type="Label" parent="HUDRoot/StatusFrame" unique_id=998752404]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 125.0
+offset_top = 48.0
+offset_right = 216.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(1, 0.91, 0.65, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.025, 0.01, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HeartsRow" type="HBoxContainer" parent="HUDRoot/StatusFrame" unique_id=546630492]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 150.0
+offset_top = 92.0
+offset_right = 400.0
+offset_bottom = 120.0
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="DashLabel" type="Label" parent="HUDRoot/StatusFrame" unique_id=2029173267]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 143.0
+offset_top = 99.0
+offset_right = 206.0
+offset_bottom = 113.0
+theme_override_colors/font_color = Color(0.7, 0.95, 0.9, 1)
+theme_override_colors/font_outline_color = Color(0.025, 0.055, 0.04, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "IMPULSO"
+
+[node name="DashBar" type="ProgressBar" parent="HUDRoot/StatusFrame" unique_id=248184334]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 200.0
+offset_top = 103.0
+offset_right = 374.0
+offset_bottom = 111.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("BarBackground")
+theme_override_styles/fill = SubResource("DashFill")
+value = 100.0
+show_percentage = false
+
+[node name="GuardLabel" type="Label" parent="HUDRoot/StatusFrame" unique_id=249593159]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 146.0
+offset_top = 111.0
+offset_right = 209.0
+offset_bottom = 125.0
+theme_override_colors/font_color = Color(0.55, 0.79, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.035, 0.07, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "APARAR"
+
+[node name="GuardBar" type="ProgressBar" parent="HUDRoot/StatusFrame" unique_id=1645389638]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 201.0
+offset_top = 114.0
+offset_right = 375.0
+offset_bottom = 122.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("BarBackground")
+theme_override_styles/fill = SubResource("GuardFill")
+value = 100.0
+show_percentage = false
+
+[node name="UltimateLabel" type="Label" parent="HUDRoot/StatusFrame" unique_id=1459603799]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 124.0
+offset_top = 155.0
+offset_right = 181.0
+offset_bottom = 172.0
+theme_override_colors/font_color = Color(0.6, 1, 0.76, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.06, 0.04, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "ULTIMATE"
+
+[node name="UltimateBar" type="ProgressBar" parent="HUDRoot/StatusFrame" unique_id=1642244801]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 184.0
+offset_top = 156.0
+offset_right = 383.0
+offset_bottom = 166.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("BarBackground")
+theme_override_styles/fill = SubResource("UltimateFill")
+show_percentage = false
+
+[node name="HealthBar" type="ProgressBar" parent="HUDRoot/StatusFrame" unique_id=1875182852]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_right = 1.0
+offset_bottom = 1.0
+
+[node name="FragmentPanel" type="TextureRect" parent="HUDRoot" unique_id=1827058855]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 447.0
+offset_top = -1.0
+offset_right = 787.0
+offset_bottom = 110.0
+mouse_filter = 2
+texture = ExtResource("2_fragments")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CoinLabel" type="Label" parent="HUDRoot/FragmentPanel" unique_id=168903509]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 124.0
+offset_top = 20.0
+offset_right = 269.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(1, 0.88, 0.42, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.025, 0.01, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FragmentBarSlot" type="HBoxContainer" parent="HUDRoot/FragmentPanel" unique_id=726114504]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 128.0
+offset_top = 49.0
+offset_right = 265.0
+offset_bottom = 65.0
+alignment = 1
+
+[node name="FragmentCoinIcon" type="TextureRect" parent="HUDRoot/FragmentPanel" unique_id=1858105459]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 55.0
+offset_top = 46.0
+offset_right = 78.0
+offset_bottom = 69.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PortalHint" type="Label" parent="HUDRoot/FragmentPanel" unique_id=1206982438]
+layout_mode = 0
+offset_left = 123.0
+offset_top = 67.0
+offset_right = 270.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(0.87, 0.77, 0.44, 1)
+theme_override_font_sizes/font_size = 7
+text = "DESPERTE O LIMIAR"
+horizontal_alignment = 1
+
+[node name="ObjectivePanel" type="TextureRect" parent="HUDRoot" unique_id=265621512]
+layout_mode = 0
+offset_left = 799.0
+offset_top = 4.0
+offset_right = 1139.0
+offset_bottom = 136.0
+mouse_filter = 2
+texture = ExtResource("3_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ObjectiveTitle" type="Label" parent="HUDRoot/ObjectivePanel" unique_id=1019820156]
+layout_mode = 0
+offset_left = 55.0
+offset_top = 43.0
+offset_right = 285.0
+offset_bottom = 57.0
+theme_override_colors/font_color = Color(1, 0.82, 0.51, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.025, 0.01, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "OBJETIVO"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ObjectiveLabel" type="Label" parent="HUDRoot/ObjectivePanel" unique_id=420794034]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 55.0
+offset_top = 57.0
+offset_right = 285.0
+offset_bottom = 75.0
+theme_override_colors/font_color = Color(0.9, 0.95, 0.82, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.04, 0.025, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TimerLabel" type="Label" parent="HUDRoot/ObjectivePanel" unique_id=663513537]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 55.0
+offset_top = 75.0
+offset_right = 285.0
+offset_bottom = 88.0
+theme_override_colors/font_color = Color(0.61, 0.91, 0.81, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+
+[node name="DifficultyLabel" type="Label" parent="HUDRoot/ObjectivePanel" unique_id=133040455]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 55.0
+offset_top = 88.0
+offset_right = 285.0
+offset_bottom = 101.0
+theme_override_colors/font_color = Color(0.95, 0.8, 0.46, 1)
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+
+[node name="BossPanel" type="TextureRect" parent="HUDRoot" unique_id=1314145264]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 386.0
+offset_top = 4.0
+offset_right = 766.0
+offset_bottom = 152.0
+mouse_filter = 2
+texture = ExtResource("3_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BossName" type="Label" parent="HUDRoot/BossPanel" unique_id=1603360323]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 58.0
+offset_top = 47.0
+offset_right = 322.0
+offset_bottom = 62.0
+theme_override_colors/font_color = Color(1, 0.82, 0.51, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.015, 0.01, 0.96)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+
+[node name="BossHealthBar" type="ProgressBar" parent="HUDRoot/BossPanel" unique_id=1311743050]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_right = 1.0
+offset_bottom = 1.0
+theme_override_styles/background = SubResource("BarBackground")
+theme_override_styles/fill = SubResource("BossFill")
+value = 100.0
+show_percentage = false
+
+[node name="BossHealthSlot" type="HBoxContainer" parent="HUDRoot/BossPanel" unique_id=698968048]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 62.0
+offset_top = 63.0
+offset_right = 318.0
+offset_bottom = 79.0
+alignment = 1
+
+[node name="BossHealthValue" type="Label" parent="HUDRoot/BossPanel" unique_id=1108492884]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 62.0
+offset_top = 63.0
+offset_right = 318.0
+offset_bottom = 79.0
+theme_override_colors/font_color = Color(1, 0.94, 0.72, 1)
+theme_override_colors/font_outline_color = Color(0.16, 0.015, 0.01, 0.98)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BossPostureBar" type="ProgressBar" parent="HUDRoot/BossPanel" unique_id=1435748816]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 62.0
+offset_top = 82.0
+offset_right = 318.0
+offset_bottom = 92.0
+theme_override_styles/background = SubResource("BarBackground")
+theme_override_styles/fill = SubResource("PostureFill")
+value = 100.0
+show_percentage = false
+
+[node name="BossPostureLabel" type="Label" parent="HUDRoot/BossPanel" unique_id=1479511426]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 62.0
+offset_top = 82.0
+offset_right = 318.0
+offset_bottom = 92.0
+theme_override_colors/font_color = Color(0.95, 0.76, 0.37, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.025, 0.01, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 7
+text = "POSTURA"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BossStatusLabel" type="Label" parent="HUDRoot/BossPanel" unique_id=1807523116]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 62.0
+offset_top = 94.0
+offset_right = 318.0
+offset_bottom = 108.0
+theme_override_colors/font_color = Color(0.91, 0.68, 0.42, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.025, 0.01, 0.95)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+
+[node name="BossLabel" type="Label" parent="HUDRoot" unique_id=1898236076]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 326.0
+offset_top = 131.0
+offset_right = 826.0
+offset_bottom = 164.0
+theme_override_colors/font_color = Color(1, 0.57, 0.49, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="ComboLabel" type="Label" parent="HUDRoot" unique_id=1226494899]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 4.0
+offset_top = 158.0
+offset_right = 334.0
+offset_bottom = 196.0
+theme_override_colors/font_color = Color(1, 0.88, 0.54, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 20
+
+[node name="MessageLabel" type="Label" parent="HUDRoot" unique_id=1236942844]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 326.0
+offset_top = 139.0
+offset_right = 826.0
+offset_bottom = 181.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.92)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+
+[node name="PauseButton" type="TextureButton" parent="HUDRoot" unique_id=1413775406]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 1086.0
+offset_top = 142.0
+offset_right = 1138.0
+offset_bottom = 194.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("4_pause")
+ignore_texture_size = true
+stretch_mode = 5

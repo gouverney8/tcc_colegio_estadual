@@ -1,0 +1,69 @@
+[gd_scene format=3 uid="uid://dcb02q7aexci2"]
+
+[ext_resource type="Texture2D" uid="uid://chesx57x7u88l" path="res://assets/parallax/industrial/static/full_background.png" id="1_lk618"]
+[ext_resource type="SpriteFrames" uid="uid://dhy45themvqj8" path="res://assets/parallax/industrial/animated/birds_frames.tres" id="2_0xxyf"]
+[ext_resource type="Script" uid="uid://bqnnq3lt1oupt" path="res://scripts/systems/parallax_motion.gd" id="3_x5v3n"]
+[ext_resource type="SpriteFrames" uid="uid://fxcfkej8c1gx" path="res://assets/parallax/industrial/animated/fog_frames.tres" id="4_s0cq5"]
+
+[node name="Parallax_Industrial_Editavel" type="Node2D" unique_id=1070308784]
+
+[node name="01_Fundo_Completo_Fornecido" type="Parallax2D" parent="." unique_id=1696716180]
+z_index = -19
+scroll_scale = Vector2(0.02, 0.01)
+repeat_size = Vector2(1276, 0)
+repeat_times = 4
+
+[node name="Forja_Ferroviaria" type="Sprite2D" parent="01_Fundo_Completo_Fornecido" unique_id=747906022]
+texture_filter = 1
+position = Vector2(638, 359)
+scale = Vector2(0.76, 0.76)
+texture = ExtResource("1_lk618")
+
+[node name="02_Passaros_Animados" type="Parallax2D" parent="." unique_id=2033520990]
+z_index = -14
+scroll_scale = Vector2(0.1, 0.04)
+repeat_size = Vector2(1536, 0)
+repeat_times = 4
+
+[node name="Passaros" type="AnimatedSprite2D" parent="02_Passaros_Animados" unique_id=1826538784]
+texture_filter = 1
+position = Vector2(150, 145)
+scale = Vector2(0.48, 0.48)
+sprite_frames = ExtResource("2_0xxyf")
+autoplay = "default"
+script = ExtResource("3_x5v3n")
+velocity = Vector2(18, 0)
+wrap_horizontal = true
+wrap_left = -120.0
+wrap_right = 1660.0
+bob_amount = 3.0
+
+[node name="03_Nevoa_Lenta_Ao_Chao" type="Parallax2D" parent="." unique_id=1777146841]
+z_index = -6
+scroll_scale = Vector2(0.34, 0.08)
+repeat_size = Vector2(1536, 0)
+repeat_times = 4
+
+[node name="Nevoa_280" type="AnimatedSprite2D" parent="03_Nevoa_Lenta_Ao_Chao" unique_id=642946981]
+modulate = Color(1, 1, 1, 0.36)
+texture_filter = 1
+position = Vector2(280, 547)
+scale = Vector2(0.72, 0.72)
+sprite_frames = ExtResource("4_s0cq5")
+autoplay = "default"
+
+[node name="Nevoa_900" type="AnimatedSprite2D" parent="03_Nevoa_Lenta_Ao_Chao" unique_id=1438389233]
+modulate = Color(1, 1, 1, 0.36)
+texture_filter = 1
+position = Vector2(904.99994, 547)
+scale = Vector2(0.72, 0.72)
+sprite_frames = ExtResource("4_s0cq5")
+autoplay = "default"
+
+[node name="Nevoa_1480" type="AnimatedSprite2D" parent="03_Nevoa_Lenta_Ao_Chao" unique_id=495793828]
+modulate = Color(1, 1, 1, 0.36)
+texture_filter = 1
+position = Vector2(1480, 548)
+scale = Vector2(0.72, 0.72)
+sprite_frames = ExtResource("4_s0cq5")
+autoplay = "default"

@@ -1,0 +1,119 @@
+[gd_scene format=3 uid="uid://cfotputqwbh04"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/components/ornamental_panel_v3.tscn" id="2_31j0y"]
+[ext_resource type="Texture2D" uid="uid://c3bm5p30p6gsw" path="res://assets/ui/componentes/botoes_madeira/estados/normal.png" id="3_umvdq"]
+[ext_resource type="FontFile" uid="uid://cl1dqdrs0e4et" path="res://assets/fonte/Germania_One/GermaniaOne-Regular.ttf" id="8_font"]
+[ext_resource type="Script" uid="uid://vhrbh4i3yjpg" path="res://scripts/ui/editable_texture_button.gd" id="9_button_script"]
+
+[sub_resource type="Theme" id="Theme_Credits"]
+default_font = ExtResource("8_font")
+default_font_size = 17
+
+[sub_resource type="AtlasTexture" id="ButtonNormal"]
+atlas = ExtResource("3_umvdq")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="ButtonPressed"]
+atlas = ExtResource("3_umvdq")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="ButtonHover"]
+atlas = ExtResource("3_umvdq")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="ButtonDisabled"]
+atlas = ExtResource("3_umvdq")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[node name="CreditsFrame" type="Control" unique_id=986197437]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_Credits")
+
+[node name="Shade" type="ColorRect" parent="." unique_id=161242013]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.004, 0.014, 0.01, 0.88)
+
+[node name="Title" type="Label" parent="." unique_id=169661415]
+z_index = 5
+layout_mode = 0
+offset_left = 250.0
+offset_top = 105.0
+offset_right = 902.0
+offset_bottom = 147.0
+theme_override_colors/font_color = Color(1, 0.941, 0.651, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 34
+text = "CRÉDITOS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Panel" parent="." unique_id=2046369571 instance=ExtResource("2_31j0y")]
+layout_mode = 1
+
+[node name="Scroll" type="ScrollContainer" parent="." unique_id=2069001242]
+layout_mode = 0
+offset_left = 190.0
+offset_top = 170.0
+offset_right = 962.0
+offset_bottom = 516.0
+horizontal_scroll_mode = 0
+
+[node name="CreditsText" type="Label" parent="Scroll" unique_id=1217570825]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(772, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.91, 0.72, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/line_spacing = 3
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="BackButton" type="TextureButton" parent="." unique_id=1786069091]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 431.0
+offset_top = 527.0
+offset_right = 721.0
+offset_bottom = 603.0
+mouse_default_cursor_shape = 2
+texture_normal = SubResource("ButtonNormal")
+texture_pressed = SubResource("ButtonPressed")
+texture_hover = SubResource("ButtonHover")
+texture_disabled = SubResource("ButtonDisabled")
+ignore_texture_size = true
+stretch_mode = 5
+script = ExtResource("9_button_script")
+caption = "VOLTAR"
+caption_size = 24
+
+[node name="Caption" type="Label" parent="BackButton" unique_id=1712858231]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "VOLTAR"
+horizontal_alignment = 1
+vertical_alignment = 1

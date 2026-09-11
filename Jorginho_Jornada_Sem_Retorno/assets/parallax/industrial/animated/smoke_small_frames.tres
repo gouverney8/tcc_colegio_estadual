@@ -1,0 +1,46 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/parallax/industrial/animated/smoke_small_strip.png" id="1_5ntbv"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2o12w"]
+atlas = ExtResource("1_5ntbv")
+region = Rect2(0, 0, 150, 138)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nlled"]
+atlas = ExtResource("1_5ntbv")
+region = Rect2(150, 0, 150, 138)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0pe6y"]
+atlas = ExtResource("1_5ntbv")
+region = Rect2(300, 0, 150, 138)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_86s62"]
+atlas = ExtResource("1_5ntbv")
+region = Rect2(450, 0, 150, 138)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ov3qo"]
+atlas = ExtResource("1_5ntbv")
+region = Rect2(600, 0, 150, 138)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2o12w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nlled")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0pe6y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_86s62")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ov3qo")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 6.0
+}]

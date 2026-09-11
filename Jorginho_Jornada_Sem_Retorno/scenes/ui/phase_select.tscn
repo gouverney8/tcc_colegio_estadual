@@ -1,0 +1,302 @@
+[gd_scene format=3 uid="uid://bt5kjwc68emr2"]
+
+[ext_resource type="Script" uid="uid://b8ppxcjlwb7h1" path="res://scripts/ui/phase_select_view.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://48dfdfcslycx" path="res://assets/ui/menu_v2/background/menu_background.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/componentes/placas/titulo_selecao_fase.png" id="3_tab"]
+[ext_resource type="Texture2D" uid="uid://vjj7feeo4cko" path="res://assets/ui/menu_v2/cards/fase_1_vale_das_aguas/normal.png" id="10_card"]
+[ext_resource type="Texture2D" uid="uid://da0kfgt8h4sq4" path="res://assets/ui/menu_v2/cards/chefe_1_templo_da_selva/normal.png" id="11_card"]
+[ext_resource type="Texture2D" uid="uid://tss5d3jrvv3i" path="res://assets/ui/menu_v2/cards/fase_2_trilhos_do_entardecer/normal.png" id="12_card"]
+[ext_resource type="Texture2D" uid="uid://c10yxnwhgujm2" path="res://assets/ui/menu_v2/cards/chefe_2_forja_ferroviaria/normal.png" id="13_card"]
+[ext_resource type="Texture2D" uid="uid://dsna1w2iv5f5s" path="res://assets/ui/menu_v2/cards/fase_3_ruinas_ao_luar/normal.png" id="14_card"]
+[ext_resource type="Texture2D" uid="uid://die0fbjpf1a4l" path="res://assets/ui/menu_v2/cards/chefe_3_altar_de_gelo/normal.png" id="15_card"]
+[ext_resource type="FontFile" uid="uid://cl1dqdrs0e4et" path="res://assets/fonte/Germania_One/GermaniaOne-Regular.ttf" id="22_font"]
+[ext_resource type="Texture2D" uid="uid://c3bm5p30p6gsw" path="res://assets/ui/componentes/botoes_madeira/estados/normal.png" id="23_button_normal"]
+[ext_resource type="Script" uid="uid://vhrbh4i3yjpg" path="res://scripts/ui/editable_texture_button.gd" id="27_button_script"]
+
+[sub_resource type="Theme" id="Theme_PhaseSelect"]
+default_font = ExtResource("22_font")
+default_font_size = 17
+
+[sub_resource type="StyleBoxFlat" id="Style_Description"]
+bg_color = Color(0.015, 0.035, 0.028, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.58, 0.82, 0.43, 0.68)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.65)
+shadow_size = 8
+
+[sub_resource type="AtlasTexture" id="ActionNormal"]
+atlas = ExtResource("23_button_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="ActionPressed"]
+atlas = ExtResource("23_button_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="ActionHover"]
+atlas = ExtResource("23_button_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[sub_resource type="AtlasTexture" id="ActionDisabled"]
+atlas = ExtResource("23_button_normal")
+region = Rect2(0, 0, 437, 113)
+margin = Rect2(23, 12, 46, 24)
+
+[node name="PhaseSelect" type="Control" unique_id=1175078674]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = SubResource("Theme_PhaseSelect")
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="." unique_id=2034768463]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Dim" type="ColorRect" parent="." unique_id=97715825]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.004, 0.018, 0.015, 0.66)
+
+[node name="TitleTab" type="TextureRect" parent="." unique_id=1946663880]
+texture_filter = 1
+layout_mode = 0
+offset_left = 379.0
+offset_top = 12.0
+offset_right = 729.0
+offset_bottom = 113.0
+mouse_filter = 2
+texture = ExtResource("3_tab")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="TitleTab" unique_id=2111040615]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = -8.0
+offset_right = 3.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.89, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.055, 0.018, 0.96)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 28
+text = "SELECIONAR FASE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Instruction" type="Label" parent="." unique_id=210917663]
+layout_mode = 0
+offset_left = 155.0
+offset_top = 101.0
+offset_right = 955.0
+offset_bottom = 130.0
+theme_override_colors/font_color = Color(0.89, 0.95, 0.78, 0.92)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 16
+text = "ESCOLHA UM CAMINHO JÁ DESBLOQUEADO"
+horizontal_alignment = 1
+
+[node name="Cards" type="Control" parent="." unique_id=864189589]
+anchors_preset = 0
+offset_left = 18.0
+offset_top = 138.0
+offset_right = 1134.0
+offset_bottom = 421.0
+mouse_filter = 2
+
+[node name="Card0" type="TextureButton" parent="Cards" unique_id=1541449913]
+texture_filter = 1
+layout_mode = 0
+offset_right = 176.0
+offset_bottom = 278.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("10_card")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Card1" type="TextureButton" parent="Cards" unique_id=1624933712]
+texture_filter = 1
+layout_mode = 0
+offset_left = 188.0
+offset_right = 348.0
+offset_bottom = 278.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("11_card")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Card2" type="TextureButton" parent="Cards" unique_id=2146027037]
+texture_filter = 1
+layout_mode = 0
+offset_left = 367.0
+offset_top = -1.0
+offset_right = 570.0
+offset_bottom = 275.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("12_card")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Card3" type="TextureButton" parent="Cards" unique_id=318137707]
+texture_filter = 1
+layout_mode = 0
+offset_left = 571.0
+offset_top = 5.0
+offset_right = 732.0
+offset_bottom = 277.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("13_card")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Card4" type="TextureButton" parent="Cards" unique_id=1887307069]
+texture_filter = 1
+layout_mode = 0
+offset_left = 743.0
+offset_right = 928.0
+offset_bottom = 278.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("14_card")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Card5" type="TextureButton" parent="Cards" unique_id=537166085]
+texture_filter = 1
+layout_mode = 0
+offset_left = 940.0
+offset_top = 5.0
+offset_right = 1122.0
+offset_bottom = 278.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("15_card")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="DescriptionPanel" type="Panel" parent="." unique_id=813497320]
+layout_mode = 0
+offset_left = 235.0
+offset_top = 432.0
+offset_right = 917.0
+offset_bottom = 555.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Style_Description")
+
+[node name="SelectedTitle" type="Label" parent="DescriptionPanel" unique_id=1141006375]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 658.0
+offset_bottom = 51.0
+theme_override_colors/font_color = Color(1, 0.87, 0.42, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+
+[node name="SelectedDescription" type="Label" parent="DescriptionPanel" unique_id=454199685]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 24.0
+offset_top = 57.0
+offset_right = 658.0
+offset_bottom = 103.0
+theme_override_colors/font_color = Color(0.86, 0.94, 0.84, 1)
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="BackButton" type="TextureButton" parent="." unique_id=232307426]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 28.0
+offset_top = 568.0
+offset_right = 228.0
+offset_bottom = 627.0
+mouse_default_cursor_shape = 2
+texture_normal = SubResource("ActionNormal")
+texture_pressed = SubResource("ActionPressed")
+texture_hover = SubResource("ActionHover")
+texture_disabled = SubResource("ActionDisabled")
+ignore_texture_size = true
+stretch_mode = 5
+script = ExtResource("27_button_script")
+caption = "VOLTAR"
+caption_size = 22
+
+[node name="Caption" type="Label" parent="BackButton" unique_id=74785052]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "VOLTAR"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayButton" type="TextureButton" parent="." unique_id=265121924]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 924.0
+offset_top = 568.0
+offset_right = 1124.0
+offset_bottom = 627.0
+mouse_default_cursor_shape = 2
+texture_normal = SubResource("ActionNormal")
+texture_pressed = SubResource("ActionPressed")
+texture_hover = SubResource("ActionHover")
+texture_disabled = SubResource("ActionDisabled")
+ignore_texture_size = true
+stretch_mode = 5
+script = ExtResource("27_button_script")
+caption = "JOGAR"
+caption_size = 23
+
+[node name="Caption" type="Label" parent="PlayButton" unique_id=78401485]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "JOGAR"
+horizontal_alignment = 1
+vertical_alignment = 1

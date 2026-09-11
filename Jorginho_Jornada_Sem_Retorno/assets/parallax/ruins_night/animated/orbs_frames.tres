@@ -1,0 +1,53 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://d3yvwb35qhree"]
+
+[ext_resource type="Texture2D" uid="uid://wlq6qln5a1c" path="res://assets/parallax/ruins_night/animated/orbs_strip.png" id="1_1ahfq"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ngmlk"]
+atlas = ExtResource("1_1ahfq")
+region = Rect2(0, 0, 59, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q22nq"]
+atlas = ExtResource("1_1ahfq")
+region = Rect2(59, 0, 59, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i73yj"]
+atlas = ExtResource("1_1ahfq")
+region = Rect2(118, 0, 59, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qbrmu"]
+atlas = ExtResource("1_1ahfq")
+region = Rect2(177, 0, 59, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qlpcy"]
+atlas = ExtResource("1_1ahfq")
+region = Rect2(236, 0, 59, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_to0dp"]
+atlas = ExtResource("1_1ahfq")
+region = Rect2(295, 0, 59, 48)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ngmlk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q22nq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i73yj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qbrmu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qlpcy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_to0dp")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 7.0
+}]

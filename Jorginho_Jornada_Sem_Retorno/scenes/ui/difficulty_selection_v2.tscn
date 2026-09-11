@@ -1,0 +1,415 @@
+[gd_scene format=3 uid="uid://vgvtprosiwqo"]
+
+[ext_resource type="Script" uid="uid://c3w76gbvw4def" path="res://scripts/ui/difficulty_selection_v2.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/ornamental_panel_v3.tscn" id="2_panel"]
+[ext_resource type="Texture2D" uid="uid://c3bm5p30p6gsw" path="res://assets/ui/componentes/botoes_madeira/estados/normal.png" id="6_disabled"]
+[ext_resource type="FontFile" uid="uid://cl1dqdrs0e4et" path="res://assets/fonte/Germania_One/GermaniaOne-Regular.ttf" id="7_font"]
+
+[sub_resource type="Theme" id="Theme_Difficulty"]
+default_font = ExtResource("7_font")
+default_font_size = 18
+
+[node name="Modal" type="Control" unique_id=1489725695]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_Difficulty")
+script = ExtResource("1_script")
+
+[node name="Shade" type="ColorRect" parent="." unique_id=378466107]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.005, 0.012, 0.012, 0.88)
+
+[node name="DifficultyPanelV2" parent="." unique_id=1791670285 instance=ExtResource("2_panel")]
+layout_mode = 1
+offset_top = 1.0
+offset_right = -1.0
+
+[node name="Title" type="Label" parent="." unique_id=412075617]
+top_level = true
+layout_mode = 0
+offset_left = 207.0
+offset_top = 51.0
+offset_right = 939.0
+offset_bottom = 99.0
+theme_override_colors/font_color = Color(1, 0.941, 0.651, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 34
+text = "ESCOLHA SEU LIMIAR"
+horizontal_alignment = 1
+
+[node name="IntroBackdrop" type="ColorRect" parent="." unique_id=997144397]
+layout_mode = 0
+offset_left = 189.0
+offset_top = 53.0
+offset_right = 957.0
+offset_bottom = 156.0
+mouse_filter = 2
+color = Color(0.025, 0.055, 0.045, 0.82)
+
+[node name="Intro" type="Label" parent="." unique_id=1682299543]
+layout_mode = 0
+offset_left = 186.0
+offset_top = 110.0
+offset_right = 970.0
+offset_bottom = 146.0
+theme_override_colors/font_color = Color(0.788, 0.918, 0.847, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "Cada caminho muda a força dos guardiões, o ritmo dos ataques e a janela de aparo."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="DifficultyCard0" type="TextureButton" parent="." unique_id=2111643728]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 168.0
+offset_top = 185.0
+offset_right = 568.0
+offset_bottom = 295.0
+mouse_default_cursor_shape = 2
+toggle_mode = true
+texture_normal = ExtResource("6_disabled")
+texture_pressed = ExtResource("6_disabled")
+texture_hover = ExtResource("6_disabled")
+texture_disabled = ExtResource("6_disabled")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="TitleLabel" type="Label" parent="DifficultyCard0" unique_id=1329439432]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 33.0
+offset_right = 372.0
+offset_bottom = 61.0
+theme_override_colors/font_color = Color(0.729, 0.961, 0.608, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "TRILHA DOS VAGA-LUMES"
+horizontal_alignment = 1
+clip_text = true
+
+[node name="SubtitleLabel" type="Label" parent="DifficultyCard0" unique_id=516444642]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 52.0
+offset_right = 370.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(1, 0.945, 0.812, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = "A floresta guia seus passos."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="SelectedMarker" type="Label" parent="DifficultyCard0" unique_id=1958418548]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 35.0
+offset_right = 37.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.463, 0.937, 1, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "◆"
+horizontal_alignment = 1
+
+[node name="DifficultyCard1" type="TextureButton" parent="." unique_id=1249093136]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 584.0
+offset_top = 185.0
+offset_right = 984.0
+offset_bottom = 295.0
+mouse_default_cursor_shape = 2
+toggle_mode = true
+texture_normal = ExtResource("6_disabled")
+texture_pressed = ExtResource("6_disabled")
+texture_hover = ExtResource("6_disabled")
+texture_disabled = ExtResource("6_disabled")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="TitleLabel" type="Label" parent="DifficultyCard1" unique_id=595611126]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 32.0
+offset_right = 372.0
+offset_bottom = 60.0
+theme_override_colors/font_color = Color(0.737, 0.937, 0.886, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "PASSOS PELO LIMIAR"
+horizontal_alignment = 1
+clip_text = true
+
+[node name="SubtitleLabel" type="Label" parent="DifficultyCard1" unique_id=2045203975]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 52.0
+offset_right = 370.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(1, 0.945, 0.812, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = "A jornada em seu ritmo original."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="SelectedMarker" type="Label" parent="DifficultyCard1" unique_id=1708783356]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 35.0
+offset_right = 37.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.463, 0.937, 1, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "◆"
+horizontal_alignment = 1
+
+[node name="DifficultyCard2" type="TextureButton" parent="." unique_id=1503890985]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 167.0
+offset_top = 310.0
+offset_right = 567.0
+offset_bottom = 420.0
+mouse_default_cursor_shape = 2
+toggle_mode = true
+texture_normal = ExtResource("6_disabled")
+texture_pressed = ExtResource("6_disabled")
+texture_hover = ExtResource("6_disabled")
+texture_disabled = ExtResource("6_disabled")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="TitleLabel" type="Label" parent="DifficultyCard2" unique_id=920838263]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 33.0
+offset_right = 372.0
+offset_bottom = 61.0
+theme_override_colors/font_color = Color(1, 0.82, 0.506, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "JORNADA SEM RETORNO"
+horizontal_alignment = 1
+clip_text = true
+
+[node name="SubtitleLabel" type="Label" parent="DifficultyCard2" unique_id=1738103718]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 52.0
+offset_right = 370.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(1, 0.945, 0.812, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = "Guardiões mais ferozes e menos recursos."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="SelectedMarker" type="Label" parent="DifficultyCard2" unique_id=1347765378]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 35.0
+offset_right = 37.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.463, 0.937, 1, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "◆"
+horizontal_alignment = 1
+
+[node name="DifficultyCard3" type="TextureButton" parent="." unique_id=1798919357]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 587.0
+offset_top = 310.0
+offset_right = 987.0
+offset_bottom = 420.0
+mouse_default_cursor_shape = 2
+toggle_mode = true
+texture_normal = ExtResource("6_disabled")
+texture_pressed = ExtResource("6_disabled")
+texture_hover = ExtResource("6_disabled")
+texture_disabled = ExtResource("6_disabled")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="TitleLabel" type="Label" parent="DifficultyCard3" unique_id=2086091734]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 32.0
+offset_right = 374.0
+offset_bottom = 60.0
+theme_override_colors/font_color = Color(1, 0.616, 0.718, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "ECLIPSE DO ÚLTIMO PORTAL"
+horizontal_alignment = 1
+clip_text = true
+
+[node name="SubtitleLabel" type="Label" parent="DifficultyCard3" unique_id=1203232093]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 52.0
+offset_right = 370.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(1, 0.945, 0.812, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 14
+text = "Para quem já aprendeu cada sinal da arena."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="SelectedMarker" type="Label" parent="DifficultyCard3" unique_id=122871176]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 35.0
+offset_right = 37.0
+offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.463, 0.937, 1, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "◆"
+horizontal_alignment = 1
+
+[node name="Divider" type="ColorRect" parent="." unique_id=1928092041]
+layout_mode = 0
+offset_left = 214.0
+offset_top = 433.0
+offset_right = 940.0
+offset_bottom = 435.0
+mouse_filter = 2
+color = Color(0.71, 0.847, 0.42, 0.48)
+
+[node name="SelectedCaption" type="Label" parent="." unique_id=744641847]
+layout_mode = 0
+offset_left = 264.0
+offset_top = 448.0
+offset_right = 900.0
+offset_bottom = 473.0
+theme_override_colors/font_color = Color(0.588, 0.843, 0.745, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 16
+text = "SEU CAMINHO"
+horizontal_alignment = 1
+
+[node name="DifficultyPreview" type="Label" parent="." unique_id=386049429]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 197.0
+offset_top = 475.0
+offset_right = 957.0
+offset_bottom = 514.0
+theme_override_colors/font_color = Color(1, 0.89, 0.604, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "Experiência recomendada  •  regras equilibradas"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="BackButton" type="TextureButton" parent="." unique_id=1671125827]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 227.0
+offset_top = 530.0
+offset_right = 517.0
+offset_bottom = 606.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("6_disabled")
+texture_pressed = ExtResource("6_disabled")
+texture_hover = ExtResource("6_disabled")
+texture_disabled = ExtResource("6_disabled")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="BackButton" unique_id=784109666]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_right = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.89, 0.604, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 23
+text = "VOLTAR"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="ConfirmButton" type="TextureButton" parent="." unique_id=1051697311]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 639.0
+offset_top = 532.0
+offset_right = 929.0
+offset_bottom = 608.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("6_disabled")
+texture_pressed = ExtResource("6_disabled")
+texture_hover = ExtResource("6_disabled")
+texture_disabled = ExtResource("6_disabled")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="ConfirmButton" unique_id=802049801]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_right = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.89, 0.604, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.035, 0.015, 0.96)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 23
+text = "ATRAVESSAR"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true

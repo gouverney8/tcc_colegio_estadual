@@ -1,0 +1,92 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/parallax/ruins_night/static/full_background.png" id="1_tbuak"]
+[ext_resource type="SpriteFrames" path="res://assets/parallax/ruins_night/animated/birds_frames.tres" id="2_r057f"]
+[ext_resource type="Script" path="res://scripts/systems/parallax_motion.gd" id="3_tpviq"]
+[ext_resource type="SpriteFrames" path="res://assets/parallax/ruins_night/animated/fog_frames.tres" id="4_xhe7r"]
+[ext_resource type="SpriteFrames" path="res://assets/parallax/ruins_night/animated/orbs_frames.tres" id="5_aa3co"]
+
+[node name="Parallax_Ruinas_Noturnas_Editavel" type="Node2D" unique_id=52881524]
+
+[node name="01_Fundo_Completo_Fornecido" type="Parallax2D" parent="." unique_id=1682151407]
+z_index = -19
+scroll_scale = Vector2(0.02, 0.01)
+repeat_size = Vector2(1276, 0)
+repeat_times = 4
+
+[node name="Ruinas_Ao_Luar" type="Sprite2D" parent="01_Fundo_Completo_Fornecido" unique_id=778674636]
+texture_filter = 1
+position = Vector2(638, 359)
+scale = Vector2(0.76, 0.76)
+texture = ExtResource("1_tbuak")
+
+[node name="02_Passaros_Animados" type="Parallax2D" parent="." unique_id=912243835]
+z_index = -13
+scroll_scale = Vector2(0.12, 0.05)
+repeat_size = Vector2(1536, 0)
+repeat_times = 4
+
+[node name="Passaros" type="AnimatedSprite2D" parent="02_Passaros_Animados" unique_id=1061786137]
+texture_filter = 1
+position = Vector2(120, 175)
+scale = Vector2(0.88, 0.88)
+sprite_frames = ExtResource("2_r057f")
+autoplay = "default"
+script = ExtResource("3_tpviq")
+velocity = Vector2(14, 0)
+wrap_horizontal = true
+wrap_left = -100.0
+wrap_right = 1650.0
+bob_amount = 3.0
+
+[node name="03_Nevoa_Baixa_Lenta" type="Parallax2D" parent="." unique_id=649721097]
+z_index = -6
+scroll_scale = Vector2(0.34, 0.08)
+repeat_size = Vector2(1536, 0)
+repeat_times = 4
+
+[node name="Nevoa_260" type="AnimatedSprite2D" parent="03_Nevoa_Baixa_Lenta" unique_id=1727349219]
+modulate = Color(1, 1, 1, 0.34)
+texture_filter = 1
+position = Vector2(260, 548)
+scale = Vector2(0.72, 0.72)
+sprite_frames = ExtResource("4_xhe7r")
+autoplay = "default"
+
+[node name="Nevoa_850" type="AnimatedSprite2D" parent="03_Nevoa_Baixa_Lenta" unique_id=1918147612]
+modulate = Color(1, 1, 1, 0.34)
+texture_filter = 1
+position = Vector2(850, 548)
+scale = Vector2(0.72, 0.72)
+sprite_frames = ExtResource("4_xhe7r")
+autoplay = "default"
+
+[node name="Nevoa_1440" type="AnimatedSprite2D" parent="03_Nevoa_Baixa_Lenta" unique_id=2007891257]
+modulate = Color(1, 1, 1, 0.34)
+texture_filter = 1
+position = Vector2(1440, 548)
+scale = Vector2(0.72, 0.72)
+sprite_frames = ExtResource("4_xhe7r")
+autoplay = "default"
+
+[node name="04_Magia_Ambiental_Discreta" type="Parallax2D" parent="." unique_id=1297244536]
+z_index = -5
+scroll_scale = Vector2(0.48, 0.1)
+repeat_size = Vector2(1536, 0)
+repeat_times = 4
+
+[node name="Orbes" type="AnimatedSprite2D" parent="04_Magia_Ambiental_Discreta" unique_id=1491828977]
+texture_filter = 1
+position = Vector2(1080, 330)
+scale = Vector2(0.62, 0.62)
+sprite_frames = ExtResource("5_aa3co")
+autoplay = "default"
+script = ExtResource("3_tpviq")
+velocity = Vector2(-2, -0.5)
+wrap_horizontal = true
+wrap_left = -80.0
+wrap_right = 1650.0
+wrap_vertical = true
+wrap_top = 220.0
+wrap_bottom = 460.0
+bob_amount = 5.0
